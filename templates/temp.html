@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flag Guesser</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+        .container {
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            width: 400px;
+            position: relative;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        #flag-outline {
+            width: 320px;
+            height: 220px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin: 0 auto 20px auto;
+            position: relative;
+            overflow: hidden;
+            background-color: #000;
+        }
+        #flag {
+            width: 100%;
+            height: 100%;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            position: absolute;
+            clip-path: circle(0% at 50% 50%);
+            transition: clip-path 15s;
+        }
+        .autocomplete-container {
+            position: relative;
+            width: calc(100% - 22px);
+            margin: 0 auto 10px auto;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            position: relative;
+            background: none;
+            z-index: 1;
+        }
+        .suggestion-text {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: #aaa;
+            z-index: 0;
+            pointer-events: none;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        @media (max-width: 420px) {
+            .container {
+                width: 90%;
+            }
+            #flag-outline {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Flag Guesser</h1>
+        <div>
+            <label for="continent-select">Choose a continent:</label>
+            <select id="continent-select">
+                <option value="all">All Countries</option>
+                <option value="africa">Africa</option>
+                <option value="asia">Asia</option>
+                <option value="europe">Europe</option>
+                <option value="north_america">North America</option>
+                <option value="south_america">South America</option>
+                <option value="oceania">Oceania</option>
+            </select>
+        </div>
+        <div id="flag-outline">
+            <img id="flag" src="" alt="Flag">
+        </div>
+        <div class="autocomplete-container">
+            <input type="text" id="country-input" placeholder="Type country name">
+            <div id="suggestion-text" class="suggestion-text"></div>
+        </div>
+        <button onclick="startGame()">Start</button>
+    </div>
+
+    <script>
+        let flagElement = document.getElementById('flag');
+        let inputElement = document.getElementById('country-input');
+        let suggestionTextElement = document.getElementById('suggestion-text');
+        let continentSelect = document.getElementById('continent-select');
+        let currentCountry = '';
+        let currentAliases = [];
+        let suggestionsList = [];
+
+        inputElement.addEventListener('input', onInputChange);
+        inputElement.addEventListener('keydown', onInputKeyDown);
+
+        const countries = {
+    "all": [
+        "Nigeria", "Ethiopia", "Egypt", "DR Congo", "Tanzania", "South Africa",
+        "Kenya", "Uganda", "Algeria", "Sudan", "Morocco", "Angola", "Mozambique",
+        "Ghana", "Madagascar", "Cameroon", "Côte d'Ivoire", "Niger", "Burkina Faso",
+        "Mali", "Malawi", "Zambia", "Senegal", "Chad", "Somalia", "Zimbabwe",
+        "Guinea", "Rwanda", "Benin", "Burundi", "Tunisia", "South Sudan", "Togo",
+        "Sierra Leone", "Libya", "Congo", "Liberia", "Central African Republic",
+        "Mauritania", "Eritrea", "Namibia", "Gambia", "Botswana", "Gabon", "Lesotho",
+        "Guinea-Bissau", "Equatorial Guinea", "Mauritius", "Eswatini", "Djibouti",
+        "Comoros", "Cabo Verde", "Sao Tome and Principe", "Seychelles", "China",
+        "India", "Indonesia", "Pakistan", "Bangladesh", "Japan", "Philippines",
+        "Vietnam", "Turkey", "Iran", "Thailand", "South Korea", "Iraq",
+        "Afghanistan", "Saudi Arabia", "Uzbekistan", "Malaysia", "Yemen", "Nepal",
+        "North Korea", "Sri Lanka", "Kazakhstan", "Syria", "Cambodia", "Jordan",
+        "Azerbaijan", "United Arab Emirates", "Tajikistan", "Israel", "Laos",
+        "Lebanon", "Kyrgyzstan", "Turkmenistan", "Singapore", "Oman",
+        "State of Palestine", "Kuwait", "Georgia", "Mongolia", "Armenia", "Qatar",
+        "Bahrain", "Timor-Leste", "Cyprus", "Bhutan", "Maldives", "Brunei", "Russia",
+        "Germany", "United Kingdom", "France", "Italy", "Spain", "Ukraine", "Poland",
+        "Romania", "Netherlands", "Belgium", "Czech Republic", "Greece", "Portugal",
+        "Sweden", "Hungary", "Belarus", "Austria", "Serbia", "Switzerland",
+        "Bulgaria", "Denmark", "Finland", "Slovakia", "Norway", "Ireland", "Croatia",
+        "Moldova", "Bosnia and Herzegovina", "Albania", "Lithuania", "North Macedonia",
+        "Slovenia", "Latvia", "Estonia", "Montenegro", "Luxembourg", "Malta",
+        "Iceland", "Andorra", "Monaco", "Liechtenstein", "San Marino", "Holy See",
+        "United States", "Mexico", "Canada", "Guatemala", "Haiti", "Cuba",
+        "Dominican Republic", "Honduras", "El Salvador", "Nicaragua", "Costa Rica",
+        "Panama", "Jamaica", "Trinidad and Tobago", "Bahamas", "Belize", "Barbados",
+        "Saint Lucia", "Grenada", "Saint Vincent and the Grenadines",
+        "Antigua and Barbuda", "Saint Kitts and Nevis", "Dominica", "Brazil",
+        "Colombia", "Argentina", "Peru", "Venezuela", "Chile", "Ecuador", "Bolivia",
+        "Paraguay", "Uruguay", "Guyana", "Suriname", "Australia", "Papua New Guinea",
+        "New Zealand", "Fiji", "Solomon Islands", "Micronesia", "Vanuatu", "Samoa",
+        "Kiribati", "Tonga", "Marshall Islands", "Palau", "Tuvalu", "Nauru"
+    ],
+    "africa": [
+        "Nigeria", "Ethiopia", "Egypt", "DR Congo", "Tanzania", "South Africa",
+        "Kenya", "Uganda", "Algeria", "Sudan", "Morocco", "Angola", "Mozambique",
+        "Ghana", "Madagascar", "Cameroon", "Côte d'Ivoire", "Niger", "Burkina Faso",
+        "Mali", "Malawi", "Zambia", "Senegal", "Chad", "Somalia", "Zimbabwe",
+        "Guinea", "Rwanda", "Benin", "Burundi", "Tunisia", "South Sudan",
+        "Togo", "Sierra Leone", "Libya", "Congo", "Liberia", "Central African Republic",
+        "Mauritania", "Eritrea", "Namibia", "Gambia", "Botswana", "Gabon", "Lesotho",
+        "Guinea-Bissau", "Equatorial Guinea", "Mauritius", "Eswatini", "Djibouti",
+        "Comoros", "Cabo Verde", "Sao Tome and Principe", "Seychelles"
+    ],
+    "asia": [
+        "China", "India", "Indonesia", "Pakistan", "Bangladesh", "Japan",
+        "Philippines", "Vietnam", "Turkey", "Iran", "Thailand", "South Korea",
+        "Iraq", "Afghanistan", "Saudi Arabia", "Uzbekistan", "Malaysia", "Yemen",
+        "Nepal", "North Korea", "Sri Lanka", "Kazakhstan", "Syria", "Cambodia",
+        "Jordan", "Azerbaijan", "United Arab Emirates", "Tajikistan", "Israel",
+        "Laos", "Lebanon", "Kyrgyzstan", "Turkmenistan", "Singapore", "Oman",
+        "State of Palestine", "Kuwait", "Georgia", "Mongolia", "Armenia",
+        "Qatar", "Bahrain", "Timor-Leste", "Cyprus", "Bhutan", "Maldives", "Brunei"
+    ],
+    "europe": [
+        "Russia", "Germany", "United Kingdom", "France", "Italy", "Spain",
+        "Ukraine", "Poland", "Romania", "Netherlands", "Belgium", "Czech Republic",
+        "Greece", "Portugal", "Sweden", "Hungary", "Belarus", "Austria",
+        "Serbia", "Switzerland", "Bulgaria", "Denmark", "Finland", "Slovakia",
+        "Norway", "Ireland", "Croatia", "Moldova", "Bosnia and Herzegovina", "Albania",
+        "Lithuania", "North Macedonia", "Slovenia", "Latvia", "Estonia", "Montenegro",
+        "Luxembourg", "Malta", "Iceland", "Andorra", "Monaco", "Liechtenstein",
+        "San Marino", "Holy See"
+    ],
+    "north_america": [
+        "United States", "Mexico", "Canada", "Guatemala", "Haiti", "Cuba",
+        "Dominican Republic", "Honduras", "El Salvador", "Nicaragua", "Costa Rica",
+        "Panama", "Jamaica", "Trinidad and Tobago", "Bahamas", "Belize", "Barbados",
+        "Saint Lucia", "Grenada", "Saint Vincent and the Grenadines", "Antigua and Barbuda",
+        "Saint Kitts and Nevis", "Dominica"
+    ],
+    "south_america": [
+        "Brazil", "Colombia", "Argentina", "Peru", "Venezuela", "Chile",
+        "Ecuador", "Bolivia", "Paraguay", "Uruguay", "Guyana", "Suriname"
+    ],
+    "oceania": [
+        "Australia", "Papua New Guinea", "New Zealand", "Fiji", "Solomon Islands",
+        "Micronesia", "Vanuatu", "Samoa", "Kiribati", "Tonga", "Marshall Islands",
+        "Palau", "Tuvalu", "Nauru"
+    ]
+};
+
+
+        function onInputChange() {
+            let query = inputElement.value.toLowerCase();
+            let continent = continentSelect.value;
+
+            if (query.length >= 3) {
+                suggestionsList = countries[continent].filter(country =>
+                    country.toLowerCase().startsWith(query)
+                );
+                showSuggestion();
+            } else {
+                suggestionTextElement.innerText = '';
+                suggestionsList = [];
+            }
+        }
+
+        function showSuggestion() {
+            if (suggestionsList.length > 0) {
+                let inputValue = inputElement.value;
+                let suggestion = suggestionsList[0];
+                suggestionTextElement.innerText = suggestion.replace(inputValue, '').toLowerCase();
+            } else {
+                suggestionTextElement.innerText = '';
+            }
+        }
+
+        function onInputKeyDown(e) {
+            if (e.key === 'Tab' && suggestionsList.length > 0) {
+                e.preventDefault();
+                inputElement.value = suggestionsList[0];
+                suggestionTextElement.innerText = '';
+            }
+        }
+
+        function clearFlagOutline() {
+            flagElement.style.clipPath = 'circle(0% at 50% 50%)';
+        }
+
+        function startGame() {
+            let continent = continentSelect.value;
+            fetch(`/get_flag?continent=${continent}`)
+                .then(response => response.json())
+                .then(data => {
+                    currentCountry = data.name.toLowerCase();
+                    currentAliases = data.aliases.map(alias => alias.toLowerCase());
+                    clearFlagOutline();
+                    inputElement.value = ''; // Reset input box
+                    suggestionTextElement.innerText = ''; // Clear suggestion
+                    setTimeout(() => {
+                        flagElement.src = data.flag;
+                        flagElement.style.clipPath = 'circle(100% at 50% 50%)';
+                    }, 500);
+
+                    let interval = setInterval(() => {
+                        let inputValue = inputElement.value.toLowerCase();
+                        if (inputValue === currentCountry || currentAliases.includes(inputValue)) {
+                            clearInterval(interval);
+                            clearFlagOutline();
+                            flagElement.style.clipPath = 'initial';
+                            setTimeout(() => {
+                                startGame();
+                            }, 200);
+                        }
+                    }, 100);
+                });
+        }
+    </script>
+</body>
+</html>
+
+
+
+countries_by_continent = {
+    "all": [
+        {"name": "Nigeria", "flag": "https://flagcdn.com/w320/ng.png", "aliases": []},
+        {"name": "Ethiopia", "flag": "https://flagcdn.com/w320/et.png", "aliases": []},
+        {"name": "Egypt", "flag": "https://flagcdn.com/w320/eg.png", "aliases": []},
+        {"name": "DR Congo", "flag": "https://flagcdn.com/w320/cd.png", "aliases": ['Democratic Republic of the Congo', 'DRC']
+    ],
+    "africa": [
+        {"name": "Nigeria", "flag": "https://flagcdn.com/w320/ng.png", "aliases": []},
+
+    ],
+    "asia": [
+        {"name": "China", "flag": "https://flagcdn.com/w320/cn.png", "aliases": ["PRC"]},
+        {"name":
+}
+
+
+
+
+
+
+
+
+
+inputElement.addEventListener('input', onInputChange);
+        inputElement.addEventListener('keydown', onInputKeyDown);
+
+        let selectedIndex = -1;
+
+        function onInputChange() {
+            let query = inputElement.value.toLowerCase();
+            let selectedContinent = continentSelect.value;
+
+            if (query.length >= 3) {
+                let fetchUrl = `/get_suggestions?query=${query}&continent=${selectedContinent}`;
+
+                fetch(fetchUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsList = data;
+                        showSuggestion();
+                        selectedIndex = -1; // Reset selected index when new suggestions are loaded
+                    });
+            } else {
+                suggestionTextElement.innerHTML = '';
+                suggestionsList = [];
+            }
+        }
+
+        function showSuggestion() {
+            suggestionTextElement.innerHTML = '';
+            if (suggestionsList.length > 0) {
+                suggestionsList.forEach((suggestion, index) => {
+                    let suggestionItem = document.createElement('div');
+                    suggestionItem.className = 'suggestion-item';
+                    suggestionItem.innerText = suggestion;
+                    suggestionItem.onclick = () => {
+                        inputElement.value = suggestion;
+                        suggestionTextElement.innerHTML = '';
+                        autocompleteContainer.style.display = 'none';
+                    };
+                    suggestionTextElement.appendChild(suggestionItem);
+                });
+            }
+        }
+
+        function onInputKeyDown(e) {
+            if (suggestionsList.length > 0) {
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = (selectedIndex + 1);
+                    highlightSuggestion();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = (selectedIndex - 1);
+                    highlightSuggestion();
+                } else if (e.key === 'Enter' && selectedIndex !== -1) {
+                    e.preventDefault();
+                    inputElement.value = suggestionsList[selectedIndex];
+                    suggestionTextElement.innerHTML = '';
+                    autocompleteContainer.style.display = 'none';
+                } else if (e.key === 'Tab' && suggestionsList.length > 0) {
+                    e.preventDefault();
+                    inputElement.value = suggestionsList[0];
+                    suggestionTextElement.innerHTML = '';
+                }
+            }
+        }
+
+        function highlightSuggestion() {
+            let suggestionItems = suggestionTextElement.getElementsByClassName('suggestion-item');
+            for (let i = 0; i < suggestionItems.length; i++) {
+                if (i === selectedIndex) {
+                    suggestionItems[i].classList.add('highlighted');
+                } else {
+                    suggestionItems[i].classList.remove('highlighted');
+                }
+            }
+        }
+
+
+function onInputKeyDown(e) {
+            if (e.key === 'Tab' && suggestionsList.length > 0) {
+                e.preventDefault();
+                inputElement.value = suggestionsList[0];
+                suggestionTextElement.innerHTML = '';
+            }
+        }
+
+
+const countryCounts = {
+            "all": 194,
+            "africa": 54,
+            "asia": 48,
+            "europe": 43,
+            "north_america": 23,
+            "south_america": 12,
+            "oceania": 14,
+            "test": 4,
+            "most_popular": 20,
+            "us_states": 50
+        };
+
+# new
+
+        function getNewFlag() {
+            let continent = continentSelect.value;
+            fetch(`/get_flag?continent=${continent}`)
+            .then(response => response.json())
+            .then(data => {
+                currentFlagData = data;
+                currentCountry = data.name.toLowerCase();
+                currentAliases = data.aliases.map(alias => alias.toLowerCase());
+                totalCountries = data.total_countries;
+
+                // Only set countriesRemaining when starting a new game
+                if (guessedCountries === 0) {
+                    countriesRemaining = totalCountries;
+                    countriesRemainingElement.textContent = countriesRemaining;
+                }
+
+                clearFlagOutline();
+                inputElement.value = '';
+                suggestionTextElement.innerHTML = '';
+                autocompleteContainer.style.display = 'block';
+                startButton.style.display = 'none';
+                learnButton.style.display = 'none';
+                raceButton.style.display = 'none';
+
+                // Load the new flag image before displaying it
+                let img = new Image();
+                img.onload = () => {
+                    flagElement.src = data.flag;
+                    flagElement.style.clipPath = 'circle(100% at 50% 50%)';
+                };
+                img.src = data.flag;
+
+                startFlagCheckInterval();
+            });
+        }
+
+        function startFlagCheckInterval() {
+            let interval = setInterval(() => {
+                let inputValue = inputElement.value.toLowerCase();
+                if (inputValue === currentCountry || currentAliases.includes(inputValue)) {
+                    clearInterval(interval);
+                    handleCorrectGuess();
+                }
+            }, 100);
+        }
+
+        function prepareForNextFlag() {
+            clearFlagOutline();
+            flagElement.style.clipPath = 'initial';
+            if (isLearnMode) {
+                revealButton.style.display = 'inline-block';
+                countryNameElement.style.display = 'none';
+            }
+            setTimeout(() => {
+                let checkmark = document.getElementById('checkmark');
+                checkmark.classList.remove('visible');
+                checkmark.classList.add('hidden');
+                getNewFlag();
+            }, 180);
+        }
+
+        function handleCorrectGuess() {
+            guessedCountries++;
+            // Decrease countriesRemaining only after a correct guess
+            countriesRemaining--;
+            countriesRemainingElement.textContent = countriesRemaining;
+
+            let checkmark = document.getElementById('checkmark');
+            checkmark.classList.remove('hidden');
+            checkmark.classList.add('visible');
+
+            if (guessedCountries === totalCountries) {
+                handleGameCompletion();
+            } else {
+                prepareForNextFlag();
+            }
+        }
+
+        function handleGameCompletion() {
+            stopTimer();
+            let time = timerElement.innerText;
+            guessedCountries = 0;
+            countriesRemaining = 0;
+            countriesRemainingElement.textContent = countriesRemaining;
+            if (!isLearnMode) {
+                saveTime(continentSelect.value, time);
+            }
+            window.location.href = `/final_screen?time=${time}&continent=${continentSelect.value}&learn=${isLearnMode}`;
+            fetch('/reset', { method: 'GET' })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message);
+                });
+        }
+# old
+
+function getNewFlag(){
+            let continent = continentSelect.value;
+            fetch(`/get_flag?continent=${continent}`)
+            .then(response => response.json())
+            .then(data => {
+                currentCountry = data.name.toLowerCase();
+                currentAliases = data.aliases.map(alias => alias.toLowerCase());
+                totalCountries = countryCounts[continent];
+                if (countriesRemaining === 0) {
+                    countriesRemaining = totalCountries;
+                } else {
+                    countriesRemaining--;
+                }
+                countriesRemainingElement.textContent = countriesRemaining;
+                clearFlagOutline();
+                inputElement.value = '';
+                suggestionTextElement.innerHTML = '';
+                autocompleteContainer.style.display = 'block';  // Show the suggestion box
+                startButton.style.display = 'none';  // Hide the start button
+                learnButton.style.display = 'none';
+                raceButton.style.display = 'none';
+                setTimeout(() => {
+                    flagElement.src = data.flag;
+                    flagElement.style.clipPath = 'circle(100% at 50% 50%)';
+                }, 500);
+
+                let interval = setInterval(() => {
+                    let inputValue = inputElement.value.toLowerCase();
+                    if (inputValue === currentCountry || currentAliases.includes(inputValue)) {
+                        guessedCountries++;
+                        clearInterval(interval); // Stop the current interval
+                        let checkmark = document.getElementById('checkmark');
+                        checkmark.classList.remove('hidden');
+                        checkmark.classList.add('visible');
+
+                        if (guessedCountries === totalCountries) {
+                            stopTimer();
+                            let time = timerElement.innerText;
+                            guessedCountries = 0;
+                            countriesRemaining = 0;  // Reset the counter
+                            countriesRemainingElement.textContent = countriesRemaining;
+                            if(!isLearnMode){
+                                saveTime(continent, time);
+                            }
+                            window.location.href = `/final_screen?time=${time}&continent=${continent}&learn=${isLearnMode}`
+                            fetch('/reset', { method: 'GET' })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log(data.message);
+                            });
+                        } else {
+                            clearFlagOutline();
+                            flagElement.style.clipPath = 'initial';
+                            if (isLearnMode) {
+                                revealButton.style.display = 'inline-block';  // Show the reveal button
+                                countryNameElement.style.display = 'none';  // Hide the country name
+                            }
+                            setTimeout(() => {
+                                checkmark.classList.remove('visible');
+                                checkmark.classList.add('hidden');
+                                getNewFlag();
+                            }, 180);
+                        }
+                    }
+                }, 100);
+            });
+        }

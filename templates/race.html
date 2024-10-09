@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- race.html -->
+<div id="race-container">
+    <h2>Race Mode</h2>
+    <div id="room-code">Room Code: <span id="room-code-display"></span></div>
+    <div id="opponent-progress">Opponent Progress: <span id="opponent-progress-display">0%</span></div>
+    <!-- Add your existing flag guessing UI here -->
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script>
+    const socket = io();
+    const roomCode = "{{ room_code }}";
+
+    socket.on('connect', () => {
+        socket.emit('join', {room: roomCode});
+    });
+
+    socket.on('player_joined', (data) => {
+        console.log(data.message);
+    });
+
+    socket.on('race_started', (data) => {
+        console.log(data.message);
+        // Start the race UI
+    });
+
+    socket.on('opponent_progress', (data) => {
+        document.getElementById('opponent-progress-display').textContent = `${data.progress}%`;
+    });
+
+    socket.on('race_results', (data) => {
+        console.log(`Race ended. Winner: ${data.winner}, Time: ${data.time}`);
+        // Display race results
+    });
+
+    // Add event listeners for flag guessing and race completion
+</script>
+</html>

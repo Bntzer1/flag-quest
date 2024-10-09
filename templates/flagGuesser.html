@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>flag.quest</title>
+    <style>
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+:root {
+    --bg-color: #1a1a1a; /* Dark background */
+    --text-color: #f0f0f0; /* Light text */
+    --primary-color: #3498db; /* Primary accent color */
+    --secondary-color: #95a5a6; /* Secondary accent color */
+    --input-bg: #2c2c2c; /* Darker input background */
+    --input-border: #444; /* Darker input border */
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-size: 16px;
+}
+
+.game-wrapper {
+    position: relative;
+    padding-top: 5vh;
+    width: 90%;
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.container {
+    position: relative;
+    background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 30px 40px;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.header {
+    margin: auto;
+    background: linear-gradient(135deg, var(--primary-color), #2980b9);
+    padding: 15px;
+    border-radius: 8px 8px 0px 0px;
+    color: #ffffff;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 2em;
+    font-weight: 600;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+#countries-remaining-container {
+    position: relative;
+    padding: 10px 15px;
+    background: linear-gradient(135deg, var(--secondary-color), #7f8c8d);
+    border-radius: 5px;
+    color: #ffffff;
+    text-align: center;
+    align-items: center;
+    display: flex;
+    margin: auto;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+#countries-remaining-container h2 {
+    font-size: 1em;
+    margin: 0 0 5px;
+    text-align: center;
+}
+
+#countries-remaining {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #1a1a1a;
+    text-align: center;
+}
+
+#flag-facts-container {
+    position: absolute;
+    padding: 10px 15px;
+    background: #2c2c2c;
+    border-radius: 8px;
+    color: #ffffff;
+    text-align: left;
+    top: 28%;
+    right: -38%;
+    z-index: -1000;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    width: 35%; /* Moved width here for better CSS management */
+    display: none;
+    font-size: 1.4em;
+    font-weight: bold;
+}
+
+#flag-facts {
+    font-size: 2em;
+    font-weight: bold;
+    color: #f0f0f0; /* Note: This color is dark on a dark background */
+}
+
+#flag-outline {
+    width: 100%;
+    height: 0;
+    padding-bottom: 60%; /* 3:5 aspect ratio */
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    margin: 20px 0;
+    position: relative;
+    overflow: hidden;
+    background-color: #f0f0f0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.flag {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    object-fit: cover;
+}
+
+.flag.visible {
+    opacity: 1;
+}
+
+.autocomplete-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+input[type="text"], select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--input-border);
+    border-radius: 5px;
+    font-size: 1em;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+input[type="text"]:focus, select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+    outline: none;
+}
+
+.suggestion-text {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    font-size: 1em;
+    color: #888;
+    padding: 10px 15px;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+    background-color: var(--input-bg);
+    border-radius: 0 0 5px 5px;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.suggestion-item {
+    padding: 5px 10px;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+
+.suggestion-item + .suggestion-item {
+    border-top: 1px solid #444;
+}
+
+.suggestion-item:hover,
+.suggestion-item.highlighted {
+    background-color: var(--primary-color);
+    color: #ffffff;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, var(--primary-color), #2980b9);
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+}
+
+button:hover {
+    background: linear-gradient(135deg, #2980b9, var(--primary-color));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+.btn-group {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.btn-group button {
+    flex: 1;
+    margin: 0 5px;
+    font-size: 1.5em;
+}
+
+#timer-learn {
+    position: relative;
+    height: 50px;
+    width: 100%;
+    margin: 20px 0;
+}
+
+#timer {
+    font-size: 1.2em;
+    font-weight: bold;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+#reveal-button {
+    padding: 10px 20px;
+    font-size: 1em;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+    background: linear-gradient(135deg, var(--primary-color), #2980b9);
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width:50%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+}
+
+#country-name {
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+    position: absolute;
+    top: 75%;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    color: var(--text-color);
+    display: none;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.checkmark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -40%) scale(0.8);
+    font-size: 8vw;
+    color: #2ecc71;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.checkmark.visible {
+    opacity: 1;
+    transform: translate(-50%, -40%) scale(1);
+}
+
+.flag-selection-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    padding: 40px 0;
+    margin-top: 100px;
+}
+
+.flag-selection-screen h1 {
+    margin: 0;
+    font-size: 2.8em;
+    color: #ffffff;
+    text-align: center;
+    font-weight: 600;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.subgroups {
+    margin-top: 200px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 50px;
+    width: 100%;
+    text-align: center;
+}
+
+.button-group button {
+    padding: 15px 25px;
+    font-size: 1.5em;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--primary-color), #2980b9);
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    width: 40%;
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.button-group button:hover {
+    background: linear-gradient(135deg, #2980b9, var(--primary-color));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+.subgroups h2 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+.back-button {
+    position: absolute;
+    top: 12%;
+    left: 20px;
+    padding: 10px 8px;
+    font-size: 2em;
+    background: linear-gradient(135deg, var(--primary-color), #2980b9);
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1000;
+    width: 10%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+}
+
+.back-button:hover {
+    background: linear-gradient(135deg, #2980b9, var(--primary-color));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+#flag-placeholder {
+    opacity: 1 !important;
+    visibility: visible !important;
+    object-fit: cover;
+    background-color: #f0f0f0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+@media (max-width: 768px) {
+    .back-button {
+        font-size: 0.9em;
+        padding: 8px 12px;
+    }
+
+    body {
+        font-size: 14px;
+    }
+
+    .button-group button {
+        font-size: 0.9em;
+        padding: 12px 20px;
+    }
+
+    .subgroups h2 {
+        font-size: 1.2em;
+    }
+
+    .flag-selection-screen h1 {
+        font-size: 1.8em;
+    }
+
+    .header h1 {
+        font-size: 1.8em;
+    }
+
+    input[type="text"], select, button, .suggestion-text {
+        font-size: 0.9em;
+    }
+
+    #timer, #country-name {
+        font-size: 1em;
+    }
+
+    #countries-remaining {
+        font-size: 1.2em;
+    }
+
+    .checkmark {
+        font-size: 14vw;
+    }
+}
+
+.checkmark.hidden {
+    opacity: 0;
+}
+
+
+
+    </style>
+</head>
+<body>
+<div id="flag-selection-screen" class="flag-selection-screen">
+    <h1>Select Flag Group</h1>
+    <div id="subgroups" class="subgroups">
+        <div id="subgroup-buttons" class="button-group">
+            <!-- Main category buttons will be dynamically added here -->
+        </div>
+    </div>
+</div>
+<div class="game-wrapper">
+    <div class="header">
+        <h1>flag.quest</h1>
+        <button id="back-button" class="back-button" onclick="goBack()">←</button>
+    </div>
+    <div class="container">
+        <div id="countries-remaining-container" style="width:40%">
+            <h2>Flags Remaining</h2>
+            <div id="countries-remaining">0</div>
+        </div>
+        <div id="timer-learn">
+            <div id="timer">00:00:00</div>
+            <button id="reveal-button" onclick="revealCountry()">Reveal</button>
+            <span id="country-name"></span>
+        </div>
+        <div>
+            <select id="continent-select">
+        <option value="all">All Countries</option>
+        <option value="50_most_recognized">Top 50 Most Recognized Flags</option>
+        <option value="30_most_recognized">Top 30 Most Recognized Flags</option>
+        <option value="10_most_recognized">Top 10 Most Recognized Flags</option>
+        <option value="africa">Africa</option>
+        <option value="asia">Asia</option>
+        <option value="europe">Europe</option>
+        <option value="north_america">North America</option>
+        <option value="south_america">South America</option>
+        <option value="oceania">Oceania</option>
+        <option value="us_states">US States</option>
+        <option value="landlocked_countries">Landlocked Countries</option>
+        <option value="island_nations">Island Nations</option>
+        <option value="opec_members">OPEC Members</option>
+        <option value="newest_countries">Newest Countries</option>
+        <option value="oldest_national_flags">Oldest National Flags</option>
+        <option value="flags_with_unique_shapes">Flags with Unique Shapes</option>
+        <option value="flags_with_animals">Flags with Animals</option>
+        <option value="flags_with_stars">Flags with Stars</option>
+        <option value="monarchies">Monarchies</option>
+        <option value="olympic_host_nations">Olympic Host Nations</option>
+        <option value="g20_countries">G20 Countries</option>
+        <option value="commonwealth_nations">Commonwealth Nations</option>
+        <option value="brics_countries">BRICS Countries</option>
+        <option value="european_union">European Union</option>
+        <option value="asean_countries">ASEAN Countries</option>
+        <option value="nordic_countries">Nordic Countries</option>
+        <option value="caribbean_nations">Caribbean Nations</option>
+        <option value="pacific_island_nations">Pacific Island Nations</option>
+        <option value="arab_league">Arab League</option>
+        <option value="former_soviet_republics">Former Soviet Republics</option>
+        <option value="countries_with_tricolor_flags">Countries with Tricolor Flags</option>
+        <option value="countries_with_crosses_on_their_flags">Countries with Crosses on Their Flags</option>
+        <option value="countries_with_crescent_moon_on_their_flags">Countries with Crescent Moon on Their Flags</option>
+        <option value="countries_with_union_jack_in_their_flags">Countries with Union Jack in Their Flags</option>
+        <option value="countries_with_suns_on_their_flags">Countries with Suns on Their Flags</option>
+        <option value="countries_that_drive_on_the_left">Countries that Drive on the Left</option>
+        <option value="microstates">Microstates</option>
+        <option value="countries_with_vertical_stripes_on_their_flags">Countries with Vertical Stripes on Their Flags</option>
+        <option value="countries_with_horizontal_stripes_on_their_flags">Countries with Horizontal Stripes on Their Flags</option>
+        <option value="countries_with_unique_currency_symbols">Countries with Unique Currency Symbols</option>
+        <option value="countries_with_only_one_bordering_country">Countries with Only One Bordering Country</option>
+        <option value="countries_with_coastlines_on_multiple_oceans">Countries with Coastlines on Multiple Oceans</option>
+        <option value="countries_with_red_primary_color">Countries with Red Primary Color</option>
+        <option value="countries_with_green_primary_color">Countries with Green Primary Color</option>
+        <option value="countries_with_white_primary_color">Countries with White Primary Color</option>
+        <option value="countries_with_blue_primary_color">Countries with Blue Primary Color</option>
+        <option value="countries_with_yellow_primary_color">Countries with Yellow Primary Color</option>
+            </select>
+        </div>
+        <div id="flag-outline">
+            <img id="flag-placeholder" class="flag" src="https://d1lvmjcsu4kp2b.cloudfront.net/flagQuest.png" alt="Placeholder Flag">
+            <img id="flag-current" class="flag" src="" alt="Current Flag">
+            <img id="flag-next" class="flag" src="" alt="Next Flag">
+        </div>
+        <div id="checkmark" class="checkmark hidden">✓</div>
+        <div id="flag-facts-container" style="width:35%">
+            <div id="flag-facts"></div>
+        </div>        
+        <div class="autocomplete-container" id="autocomplete-container">
+            <input type="text" id="country-input" placeholder="Type country name" autocomplete="off">
+            <div id="suggestion-text" class="suggestion-text"></div>
+        </div>
+        <div class="btn-group" style="width:100%">
+            <button style="width:100%" id="mode-button">Start</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+        const gameMode = '{{ mode }}';
+        const inputElement = document.getElementById('country-input');
+        const suggestionTextElement = document.getElementById('suggestion-text');
+        const autocompleteContainer = document.getElementById('autocomplete-container');
+        const modeButton = document.getElementById('mode-button');
+        const continentSelect = document.getElementById('continent-select');
+        const timerElement = document.getElementById('timer');
+        const countriesRemainingElement = document.getElementById('countries-remaining');
+        const countryNameElement = document.getElementById('country-name');
+        const revealButton = document.getElementById('reveal-button');
+        const currentFlagElement = document.getElementById('flag-current');
+        const nextFlagElement = document.getElementById('flag-next');
+        const placeholderFlag = document.getElementById('flag-placeholder');
+        const flagOutline = document.getElementById('flag-outline');
+        const checkmark = document.getElementById('checkmark');
+        const backButton = document.getElementById('back-button');
+        const countriesRemainingContainer = document.getElementById('countries-remaining-container');
+        const gameWrapper = document.querySelector('.game-wrapper');
+        const flagSelectionScreen = document.getElementById('flag-selection-screen');
+        const subgroupButtons = document.getElementById('subgroup-buttons');
+        const subgroupsDiv = document.getElementById('subgroups');
+        const factsContainer = document.getElementById('flag-facts-container');
+        const flagCategories = {
+            'All': ['all'],
+            'Most Recognized': ['10_most_recognized', '30_most_recognized', '50_most_recognized'],
+            'Continent': ['africa', 'asia', 'europe', 'north_america', 'south_america', 'oceania'],
+            'Flag Design': [
+                'flags_with_unique_shapes',
+                'flags_with_animals',
+                'flags_with_stars',
+                'countries_with_tricolor_flags',
+                'countries_with_crosses_on_their_flags',
+                'countries_with_crescent_moon_on_their_flags',
+                'countries_with_union_jack_in_their_flags',
+                'countries_with_suns_on_their_flags',
+                'countries_with_vertical_stripes_on_their_flags',
+                'countries_with_horizontal_stripes_on_their_flags',
+                'countries_with_red_primary_color',
+                'countries_with_green_primary_color',
+                'countries_with_white_primary_color',
+                'countries_with_blue_primary_color',
+                'countries_with_yellow_primary_color'
+            ],
+            'Geography': [
+                'landlocked_countries',
+                'island_nations',
+                'microstates',
+                'countries_with_only_one_bordering_country',
+                'countries_with_coastlines_on_multiple_oceans'
+            ],
+            'Country Groups': [
+                'opec_members',
+                'monarchies',
+                'olympic_host_nations',
+                'g20_countries',
+                'commonwealth_nations',
+                'brics_countries',
+                'european_union',
+                'asean_countries',
+                'nordic_countries',
+                'caribbean_nations',
+                'pacific_island_nations',
+                'arab_league',
+                'former_soviet_republics',
+                'countries_that_drive_on_the_left'
+            ],
+            'Time-based': ['newest_countries', 'oldest_national_flags'],
+            'Other': ['test', 'us_states']
+        };
+
+        let currentCountry = '';
+        let currentAliases = [];
+        let suggestionsList = [];
+        let startTime;
+        let timerInterval;
+        let totalCountries;
+        let guessedCountries = 0;
+        let countriesRemaining = 0;
+        let isLearnMode = false;
+        let currentFlagData = null;
+        let isFirstFlag = true;
+        let selectedIndex = -1;
+        let flagCheckInterval;
+        let currentFacts = [];
+
+        inputElement.addEventListener('input', onInputChange);
+        inputElement.addEventListener('keydown', onInputKeyDown);
+
+
+        function initializeGame() {
+            switch (gameMode) {
+                case 'solo':
+                    modeButton.textContent = 'Start Solo';
+                    modeButton.onclick = startGame;
+                    break;
+                case 'learn':
+                    modeButton.textContent = 'Start Learn';
+                    modeButton.onclick = startLearn;
+                    break;
+                case 'race':
+                    modeButton.textContent = 'Start Race';
+                    modeButton.onclick = startRace;
+                    break;
+                default:
+                    console.error('Invalid game mode');
+            }
+        }
+
+        function onInputChange() {
+            const query = inputElement.value.toLowerCase();
+            const selectedContinent = continentSelect.value;
+
+            if (query.length >= 3) {
+                fetch(`/get_suggestions?query=${query}&continent=${selectedContinent}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsList = data;
+                        showSuggestion();
+                        selectedIndex = -1;
+                    });
+            } else {
+                suggestionTextElement.innerHTML = '';
+                suggestionsList = [];
+            }
+        }
+
+        function showSuggestion() {
+            suggestionTextElement.innerHTML = '';
+            suggestionsList.forEach((suggestion, index) => {
+                const suggestionItem = document.createElement('div');
+                suggestionItem.className = 'suggestion-item';
+                suggestionItem.innerText = suggestion;
+
+                suggestionItem.onmouseenter = () => {
+                    selectedIndex = index;
+                    highlightSuggestion();
+                };
+
+                suggestionItem.onclick = () => {
+                    inputElement.value = suggestion;
+                    suggestionTextElement.innerHTML = '';
+                };
+                suggestionTextElement.appendChild(suggestionItem);
+            });
+        }
+
+        function onInputKeyDown(e) {
+            if (suggestionsList.length > 0) {
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = (selectedIndex + 1) % suggestionsList.length;
+                    highlightSuggestion();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = (selectedIndex - 1 + suggestionsList.length) % suggestionsList.length;
+                    highlightSuggestion();
+                } else if (e.key === 'Enter' && selectedIndex !== -1) {
+                    e.preventDefault();
+                    inputElement.value = suggestionsList[selectedIndex];
+                    suggestionTextElement.innerHTML = '';
+                } else if (e.key === 'Tab') {
+                    e.preventDefault();
+                    inputElement.value = suggestionsList[0];
+                    suggestionTextElement.innerHTML = '';
+                }
+            }
+        }
+
+        function highlightSuggestion() {
+            const suggestionItems = suggestionTextElement.getElementsByClassName('suggestion-item');
+            Array.from(suggestionItems).forEach((item, index) => {
+                item.classList.toggle('highlighted', index === selectedIndex);
+            });
+        }
+
+
+        function showMainCategories() {
+            subgroupButtons.innerHTML = '';
+            const mainCategories = Object.keys(flagCategories);
+            mainCategories.forEach(category => {
+                const button = document.createElement('button');
+                button.textContent = category;
+                const subgroups = flagCategories[category];
+                if (subgroups.length === 1 && category !== 'Other') {
+                    // If the category has only one subgroup, select it directly
+                    const subgroup = subgroups[0];
+                    button.onclick = () => selectFlagGroup(subgroup);
+                } else {
+                    button.onclick = () => showCategorySubgroups(category);
+                }
+                subgroupButtons.appendChild(button);
+            });
+            subgroupsDiv.style.display = 'block';
+        }
+
+        function showCategorySubgroups(category) {
+            subgroupButtons.innerHTML = '';
+            const subgroups = flagCategories[category];
+            if (!subgroups) {
+                // Handle error or no subgroups
+                return;
+            }
+            subgroups.forEach(subgroup => {
+                const button = document.createElement('button');
+                button.textContent = subgroup.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                button.onclick = () => selectFlagGroup(subgroup);
+                subgroupButtons.appendChild(button);
+            });
+            // Add back button
+            const backButton = document.createElement('button');
+            backButton.textContent = 'Back';
+            backButton.onclick = showMainCategories;
+            subgroupButtons.appendChild(backButton);
+
+            subgroupsDiv.style.display = 'block';
+        }
+
+        function goBackToGroupSelection() {
+            // Hide subgroups and show main categories
+            showMainCategories();
+        }
+
+        function selectFlagGroup(subgroup) {
+            flagSelectionScreen.style.display = 'none';
+            gameWrapper.style.display = 'block';
+            continentSelect.value = subgroup;
+            continentSelect.style.display = 'none';
+
+            modeButton.style.display = 'inline-block';
+            countriesRemainingContainer.style.display = 'block';
+
+            autocompleteContainer.style.display = 'none';
+            showPlaceholderFlag();
+        }
+
+        function startGame() {
+            countriesRemaining = 0;
+            guessedCountries = 0;
+            countriesRemainingElement.textContent = countriesRemaining;
+            startTimer();
+            hidePlaceholderFlag();
+
+            isFirstFlag = true;
+
+            modeButton.style.display = 'none';
+            autocompleteContainer.style.display = 'block';
+
+            const getFlag = debounce(() => {
+                getNewFlag();
+            }, 100);
+            getFlag();
+        }
+
+        function startLearn() {
+            isLearnMode = true;
+            countriesRemaining = 0;
+            countriesRemainingElement.textContent = countriesRemaining;
+            timerElement.style.display = 'none';
+            revealButton.style.display = 'inline-block';
+            countryNameElement.style.display = 'none';
+            inputElement.value = '';
+            placeholderFlag.style.display = 'none';
+
+            modeButton.style.display = 'none';
+
+            isFirstFlag = true;
+            hidePlaceholderFlag();
+            getNewFlag();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            showMainCategories();
+            adjustPlaceholderFlag();
+            initializeGame();
+            gameWrapper.style.display = 'none';
+        });
+
+        function getNewFlag() {
+            const continent = continentSelect.value;
+            fetch(`/get_flag?continent=${continent}`, { cache: 'no-cache' })
+                .then(response => response.json())
+                .then(data => {
+                    currentFlagData = data;
+                    currentCountry = data.name;
+                    currentAliases = data.aliases.map(alias => alias.toLowerCase());
+                    totalCountries = data.total_countries;
+                    currentFacts = data.facts;
+
+                    if (!isFirstFlag) {
+                        currentFlagElement.src = data.flag;
+                    }
+
+
+                    if (guessedCountries === 0) {
+                        countriesRemaining = totalCountries;
+                        countriesRemainingElement.textContent = countriesRemaining;
+                    }
+
+                    inputElement.value = '';
+                    suggestionTextElement.innerHTML = '';
+                    autocompleteContainer.style.display = 'block';
+
+                    modeButton.style.display = 'none';
+
+                    transitionToNewFlag(data.flag);
+                    startFlagCheckInterval();
+                });
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), wait);
+            };
+        }
+
+        function transitionToNewFlag(newFlagSrc) {
+            if (isFirstFlag) {
+                currentFlagElement.src = newFlagSrc;
+                currentFlagElement.onload = () => {
+                    placeholderFlag.style.opacity = '0';
+                    currentFlagElement.style.opacity = '1';
+
+                };
+                isFirstFlag = false;
+            } else {
+                nextFlagElement.src = newFlagSrc;
+                nextFlagElement.onload = () => {
+                    currentFlagElement.style.opacity = '0';
+                    nextFlagElement.style.opacity = '1';
+                    currentFlagElement.src = nextFlagElement.src;
+                };
+            }
+
+            currentFlagElement.onerror = () => {
+                console.error('Error loading the new flag');
+                placeholderFlag.style.opacity = '1';
+                currentFlagElement.style.opacity = '0';
+            };
+        }
+
+        function adjustPlaceholderFlag() {
+            const containerAspect = flagOutline.offsetWidth / flagOutline.offsetHeight;
+            const imgAspect = placeholderFlag.naturalWidth / placeholderFlag.naturalHeight;
+
+            if (imgAspect > containerAspect) {
+                placeholderFlag.style.width = '100%';
+                placeholderFlag.style.height = 'auto';
+                placeholderFlag.style.top = '50%';
+                placeholderFlag.style.left = '50%';
+                placeholderFlag.style.transform = 'translate(-50%, -50%)';
+            } else {
+                placeholderFlag.style.width = 'auto';
+                placeholderFlag.style.height = '100%';
+                placeholderFlag.style.top = '50%';
+                placeholderFlag.style.left = '50%';
+                placeholderFlag.style.transform = 'translate(-50%, -50%)';
+            }
+        }
+
+        function startFlagCheckInterval() {
+            flagCheckInterval = setInterval(() => {
+                const inputValue = inputElement.value.toLowerCase();
+                if (inputValue === currentCountry.toLowerCase() || currentAliases.includes(inputValue)) {
+                    clearInterval(flagCheckInterval);
+                    console.log(inputValue);
+                    handleCorrectGuess();
+                }
+            }, 100);
+        }
+
+        function prepareForNextFlag() {
+            if (isLearnMode) {
+                revealButton.style.display = 'inline-block';
+                factsContainer.innerHTML = '';
+                factsContainer.style.display = 'none';
+                countryNameElement.style.display = 'none';
+            }
+            console.log(isFirstFlag);
+            if (!isFirstFlag) {
+                setTimeout(() => {
+                    checkmark.classList.replace('visible', 'hidden');
+                    getNewFlag();
+                }, 180);
+            }
+        }
+
+        function handleCorrectGuess() {
+            guessedCountries++;
+            countriesRemaining--;
+            countriesRemainingElement.textContent = countriesRemaining;
+            
+
+            checkmark.classList.replace('hidden', 'visible');
+
+            if (guessedCountries === totalCountries) {
+                handleGameCompletion();
+            } else {
+                prepareForNextFlag();
+            }
+        }
+
+        function handleGameCompletion() {
+            stopTimer();
+            const time = timerElement.innerText;
+            guessedCountries = 0;
+            countriesRemaining = 0;
+            countriesRemainingElement.textContent = countriesRemaining;
+
+            if (!isLearnMode) {
+                saveTime(continentSelect.value, time);
+            }
+            window.location.href = `/final_screen?time=${time}&continent=${continentSelect.value}&learn=${isLearnMode}`;
+            fetch('/reset')
+                .then(response => response.json())
+                .then(data => console.log(data.message));
+        }
+
+        function saveTime(continent, time) {
+            let times = JSON.parse(localStorage.getItem(`${continent}_times`) || '[]');
+            times.push(time);
+            times.sort((a, b) => {
+                const [aMin, aSec, aHund] = a.split(':').map(Number);
+                const [bMin, bSec, bHund] = b.split(':').map(Number);
+                return (aMin * 6000 + aSec * 100 + aHund) - (bMin * 6000 + bSec * 100 + bHund);
+            });
+            localStorage.setItem(`${continent}_times`, JSON.stringify(times.slice(0, 5)));
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimer, 10);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function updateTimer() {
+            const elapsedTime = Date.now() - startTime;
+            const minutes = Math.floor(elapsedTime / 60000).toString().padStart(2, '0');
+            const seconds = Math.floor((elapsedTime % 60000) / 1000).toString().padStart(2, '0');
+            const hundredths = Math.floor((elapsedTime % 1000) / 10).toString().padStart(2, '0');
+
+            timerElement.textContent = `${minutes}:${seconds}:${hundredths}`;
+        }
+
+        function resetTimer() {
+            stopTimer();
+            timerElement.textContent = '00:00:00';
+        }
+
+        function revealCountry() {
+            if (currentCountry) {
+                countryNameElement.innerText = currentCountry;
+                countryNameElement.style.display = 'inline';
+                revealButton.style.display = 'none';
+                factsContainer.style.display = 'block';
+                displayFlagFacts(currentFacts);
+            }
+        }
+
+        function displayFlagFacts(facts) {
+            console.log(currentCountry)
+
+            factsContainer.innerHTML = '';
+            console.log("displaying");
+
+            const ul = document.createElement('ul');
+
+            facts.forEach(fact => {
+                const li = document.createElement('li');
+                li.textContent = fact;
+                ul.appendChild(li);
+            });
+
+            factsContainer.appendChild(ul);
+        }
+
+        function goBack() {
+            flagSelectionScreen.style.display = 'flex';
+            gameWrapper.style.display = 'none';
+            resetGameState();
+        }
+
+        function resetGameState() {
+            resetTimer();
+            countriesRemaining = 0;
+            guessedCountries = 0;
+            countriesRemainingElement.textContent = countriesRemaining;
+            countriesRemainingContainer.style.display = 'none';
+            fetch('/reset')
+                .then(response => response.json())
+                .then(data => console.log(data.message));
+
+            modeButton.style.display = 'inline-block';
+
+            autocompleteContainer.style.display = 'none';
+
+            timerElement.style.display = 'block';
+            revealButton.style.display = 'none';
+            countryNameElement.style.display = 'none';
+            if (flagCheckInterval) {
+                clearInterval(flagCheckInterval);
+            }
+
+            currentCountry = null;
+            isFirstFlag = true;
+            currentFlagData = placeholderFlag;
+            currentFlagElement.src = '';
+            nextFlagElement.src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+            currentCountry = '';
+            totalCountries = 0;
+            factsContainer.style.display = 'none';
+            factsContainer.innerHTML = '';
+            currentFacts = [];
+
+            // Reset any other game-specific variables
+            backButton.style.display = 'block';
+            showPlaceholderFlag();
+        }
+
+        function hideBackButton() {
+            backButton.style.display = 'none';
+        }
+
+        function showPlaceholderFlag() {
+            placeholderFlag.style.display = 'block';
+            currentFlagElement.style.display = 'none';
+            nextFlagElement.style.display = 'none';
+            currentFlagElement.style.opacity = 0;
+            placeholderFlag.style.opacity =  1;
+        }
+
+        function hidePlaceholderFlag() {
+            placeholderFlag.style.display = 'none';
+            currentFlagElement.style.display = 'block';
+            nextFlagElement.style.display = 'block';
+
+        }
+    </script>
+
+</body>
+</html>

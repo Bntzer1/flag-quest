@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congratulations!</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --text-color: #f0f0f0;
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --highlight-color: #e74c3c;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--secondary-color);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            width: 500px;
+            max-width: 90%;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        h2 {
+            font-size: 22px;
+            margin-top: 20px;
+            color: var(--primary-color);
+        }
+
+        .current-time {
+            font-size: 38px;
+            font-weight: bold;
+            color: var(--highlight-color);
+            margin: 20px 0;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .completion-message {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 4px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        #times-list {
+            list-style-type: none;
+            padding-left: 0;
+            text-align: left;
+            font-size: 18px; /* Increased font size */
+        }
+
+        #times-list li {
+            margin-bottom: 10px; /* Increased margin for better spacing */
+        }
+
+        #times-list li::before {
+            content: counter(item) ". ";
+            counter-increment: item;
+            font-weight: bold;
+            margin-right: 8px; /* Slightly increased margin */
+        }
+
+        .top-time {
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Congratulations!</h1>
+        <div id="completion-message" class="completion-message"></div>
+        <div id="current-time" class="current-time"></div>
+        <div id="top-times">
+            <h2>Top 5 Times:</h2>
+            <ol id="times-list"></ol>
+        </div>
+        <div class="buttons">
+            <button id="retry-button" onclick="window.location.href='/flag_guesser?continent={{ continent }}'">Play Again</button>
+            <button onclick="window.location.href='/'">Change Mode</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const continent = "{{ continent }}";
+            let currentTime = "{{ time }}";
+            const isLearnMode = {{ learn | tojson }}; // Convert Python bool to JS bool
+
+            const continentDisplayNames = {
+                "all": "All Countries",
+                "50_most_recognized": "Top 50 Most Recognized Flags",
+                "30_most_recognized": "Top 30 Most Recognized Flags",
+                "10_most_recognized": "Top 10 Most Recognized Flags",
+                "africa": "Africa",
+                "asia": "Asia",
+                "europe": "Europe",
+                "north_america": "North America",
+                "south_america": "South America",
+                "oceania": "Oceania",
+                "us_states": "US States",
+                "landlocked_countries": "Landlocked Countries",
+                "island_nations": "Island Nations",
+                "opec_members": "OPEC Members",
+                "newest_countries": "Newest Countries",
+                "oldest_national_flags": "Oldest National Flags",
+                "flags_with_unique_shapes": "Flags with Unique Shapes",
+                "flags_with_animals": "Flags with Animals",
+                "flags_with_stars": "Flags with Stars",
+                "monarchies": "Monarchies",
+                "olympic_host_nations": "Olympic Host Nations",
+                "g20_countries": "G20 Countries",
+                "commonwealth_nations": "Commonwealth Nations",
+                "brics_countries": "BRICS Countries",
+                "european_union": "European Union",
+                "asean_countries": "ASEAN Countries",
+                "nordic_countries": "Nordic Countries",
+                "caribbean_nations": "Caribbean Nations",
+                "pacific_island_nations": "Pacific Island Nations",
+                "arab_league": "Arab League",
+                "former_soviet_republics": "Former Soviet Republics",
+                "countries_with_tricolor_flags": "Countries with Tricolor Flags",
+                "countries_with_crosses_on_their_flags": "Countries with Crosses on Their Flags",
+                "countries_with_crescent_moon_on_their_flags": "Countries with Crescent Moon on Their Flags",
+                "countries_with_union_jack_in_their_flags": "Countries with Union Jack in Their Flags",
+                "countries_with_suns_on_their_flags": "Countries with Suns on Their Flags",
+                "countries_that_drive_on_the_left": "Countries that Drive on the Left",
+                "microstates": "Microstates",
+                "countries_with_vertical_stripes_on_their_flags": "Countries with Vertical Stripes on Their Flags",
+                "countries_with_horizontal_stripes_on_their_flags": "Countries with Horizontal Stripes on Their Flags",
+                "countries_with_unique_currency_symbols": "Countries with Unique Currency Symbols",
+                "countries_with_only_one_bordering_country": "Countries with Only One Bordering Country",
+                "countries_with_coastlines_on_multiple_oceans": "Countries with Coastlines on Multiple Oceans",
+                "countries_with_red_primary_color": "Countries with Red Primary Color",
+                "countries_with_green_primary_color": "Countries with Green Primary Color",
+                "countries_with_white_primary_color": "Countries with White Primary Color",
+                "countries_with_blue_primary_color": "Countries with Blue Primary Color",
+                "countries_with_yellow_primary_color": "Countries with Yellow Primary Color",
+                "test": "Penisland",
+                "most_popular": "Top 20 Common Flags"
+            };
+
+            const completionMessage = document.getElementById('completion-message');
+            const currentTimeElement = document.getElementById('current-time');
+
+            const continentDisplayName = continentDisplayNames[continent] || continent;
+
+            if (isLearnMode) {
+                completionMessage.innerHTML = `All flags in ${continentDisplayName} learned!`;
+                currentTimeElement.style.display = 'none';
+            } else {
+                completionMessage.innerHTML = `You guessed all flags in ${continentDisplayName}!`;
+                currentTimeElement.textContent = currentTime;
+            }
+
+            let times = JSON.parse(localStorage.getItem(`${continent}_times`) || '[]');
+            const timesList = document.getElementById('times-list');
+            timesList.style.counterReset = 'item 0';
+
+            if (isLearnMode) {
+                document.getElementById('top-times').style.display = 'none'; // Hide top times in learn mode
+                document.getElementById('retry-button').textContent = 'Learn Again';
+                document.getElementById('retry-button').setAttribute("onclick", "window.location.href='/flag_guesser?mode=learn'");
+            } else if (times.length === 0) {
+                timesList.innerHTML = '<li>No times recorded yet.</li>';
+            } else {
+                times.forEach((time, index) => {
+                    const li = document.createElement('li');
+                    const timeSpan = document.createElement('span');
+                    timeSpan.textContent = time;
+                    if (time === currentTime) {
+                        timeSpan.classList.add('top-time');
+                    }
+                    li.appendChild(timeSpan);
+                    timesList.appendChild(li);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
