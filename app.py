@@ -1,12 +1,12 @@
 from flask import Flask, render_template, jsonify, request, send_from_directory
-from flask_socketio import SocketIO, emit, join_room, leave_room
+#from flask_socketio import SocketIO, emit, join_room, leave_room
 import string
 import random
 from countries import countries_by_continent
 
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-socketio = SocketIO(app)
+#socketio = SocketIO(app)
 
 recent_countries = []
 
@@ -156,29 +156,29 @@ def join_race(room_code):
     # Validate room code and join race
     return render_template('race.html', room_code=room_code)
 
-@socketio.on('join')
-def on_join(data):
-    room = data['room']
-    join_room(room)
-    emit('player_joined', {'message': f'Player joined the race'}, room=room)
+# @socketio.on('join')
+# def on_join(data):
+#     room = data['room']
+#     join_room(room)
+#     emit('player_joined', {'message': f'Player joined the race'}, room=room)
 
-@socketio.on('start_race')
-def on_start_race(data):
-    room = data['room']
-    # Initialize game state for the room
-    emit('race_started', {'message': 'Race started'}, room=room)
+# @socketio.on('start_race')
+# def on_start_race(data):
+#     room = data['room']
+#     # Initialize game state for the room
+#     emit('race_started', {'message': 'Race started'}, room=room)
 
-@socketio.on('flag_guessed')
-def on_flag_guessed(data):
-    room = data['room']
-    # Update game state and check for race completion
-    emit('opponent_progress', {'progress': data['progress']}, room=room)
+# @socketio.on('flag_guessed')
+# def on_flag_guessed(data):
+#     room = data['room']
+#     # Update game state and check for race completion
+#     emit('opponent_progress', {'progress': data['progress']}, room=room)
 
-@socketio.on('race_completed')
-def on_race_completed(data):
-    room = data['room']
-    # Record race results and notify players
-    emit('race_results', {'winner': data['winner'], 'time': data['time']}, room=room)
+# @socketio.on('race_completed')
+# def on_race_completed(data):
+#     room = data['room']
+#     # Record race results and notify players
+#     emit('race_results', {'winner': data['winner'], 'time': data['time']}, room=room)
 
 
 if __name__ == '__main__':
