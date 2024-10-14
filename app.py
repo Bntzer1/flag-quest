@@ -1,12 +1,15 @@
 from flask import Flask, render_template, jsonify, request, send_from_directory
-#from flask_socketio import SocketIO, emit, join_room, leave_room
+from flask_socketio import SocketIO, emit, join_room, leave_room
 import string
 import random
 from countries import countries_by_continent
+import os
+import smtplib
+from email.message import EmailMessage
 
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-#socketio = SocketIO(app)
+socketio = SocketIO(app)
 
 recent_countries = []
 
@@ -140,6 +143,44 @@ def reset():
 @app.route('/static/<path:filename>')
 def serve_static(filename):
     return send_from_directory(app.static_folder, filename, cache_timeout=0)
+
+@app.route('/submit_suggestion', methods=['POST'])
+def submit_suggestion():
+    data = request.get_json()
+    suggestion = data.get('suggestion', '').strip()
+    if suggestion:
+        try:
+            send_email(suggestion)
+            print(f"New suggestion received: {suggestion}")
+            return jsonify({'message': 'Suggestion submitted successfully'}), 200
+        except Exception as e:
+            print(f"Error sending email: {e}")
+            return jsonify({'error': 'Failed to send suggestion via email'}), 500
+    else:
+        return jsonify({'error': 'No suggestion provided'}), 400
+
+def send_email(suggestion):
+    # Fetch environment variables
+    EMAIL_ADDRESS = os.environ.get('EMAIL_USER')
+    EMAIL_PASSWORD = os.environ.get('EMAIL_PASS')
+    RECEIVER_EMAIL = os.environ.get('RECEIVER_EMAIL')  # Your email address
+
+    if not EMAIL_ADDRESS or not EMAIL_PASSWORD or not RECEIVER_EMAIL:
+        raise Exception("Email credentials are not fully set")
+
+    msg = EmailMessage()
+    msg['Subject'] = 'New Suggestion Received'
+    msg['From'] = EMAIL_ADDRESS
+    msg['To'] = RECEIVER_EMAIL
+    msg.set_content(f"Suggestion:\n\n{suggestion}")
+
+    # Connect to the SMTP server
+    with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.ehlo()
+        smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+        smtp.send_message(msg)
 
 
 def generate_room_code():

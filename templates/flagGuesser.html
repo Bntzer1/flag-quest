@@ -125,8 +125,7 @@ body {
     margin: 20px 0;
     position: relative;
     overflow: hidden;
-    background-color: #f0f0f0;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .flag {
@@ -138,6 +137,7 @@ body {
     opacity: 0;
     transition: opacity 0.5s ease-in-out;
     object-fit: cover;
+    object-position: center;
 }
 
 .flag.visible {
@@ -399,6 +399,102 @@ button:hover {
     height: 100%;
 }
 
+/* Suggestions Button */
+#suggestions-button {
+    position: fixed;
+    top: 20px;
+    right: 40px;
+    padding: 12px 15px;
+    width: 8%;
+    background: linear-gradient(135deg, var(--primary-color), #2980b9);
+    color: #ffffff;
+    border: none;
+    border-radius: 5%;
+    font-size: 0.7em;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+}
+
+#suggestions-button:hover {
+    background: linear-gradient(135deg, #2980b9, var(--primary-color));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+/* Suggestions Modal */
+#suggestions-modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.7); /* Black background with opacity */
+}
+
+.modal-content {
+    background-color: #2c2c2c;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 8px;
+    position: relative;
+    color: var(--text-color);
+}
+
+#close-modal {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#close-modal:hover,
+#close-modal:focus {
+    color: #ffffff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#suggestions-text {
+    width: 95%;
+    height: 150px;
+    padding: 12px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 5px;
+    color: var(--text-color);
+    font-size: 1em;
+    resize: vertical;
+    margin-bottom: 15px;
+}
+
+#send-suggestion {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, var(--primary-color), #2980b9);
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#send-suggestion:hover {
+    background: linear-gradient(135deg, #2980b9, var(--primary-color));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+
 @media (max-width: 768px) {
     .back-button {
         font-size: 0.9em;
@@ -452,6 +548,17 @@ button:hover {
     </style>
 </head>
 <body>
+    <button id="suggestions-button">Suggestions or Errors</button>
+
+    <!-- Suggestions Modal -->
+    <div id="suggestions-modal">
+        <div class="modal-content">
+            <span id="close-modal">&times;</span>
+            <h2>Send Suggestion/Error</h2>
+            <textarea id="suggestions-text" placeholder="Type your suggestion/error here..."></textarea>
+            <button id="send-suggestion">Send</button>
+        </div>
+    </div>
 <div id="flag-selection-screen" class="flag-selection-screen">
     <h1>Select Flag Group</h1>
     <div id="subgroups" class="subgroups">
@@ -570,6 +677,11 @@ button:hover {
         const subgroupButtons = document.getElementById('subgroup-buttons');
         const subgroupsDiv = document.getElementById('subgroups');
         const factsContainer = document.getElementById('flag-facts-container');
+        const suggestionsButton = document.getElementById('suggestions-button');
+        const suggestionsModal = document.getElementById('suggestions-modal');
+        const closeModal = document.getElementById('close-modal');
+        const sendSuggestionButton = document.getElementById('send-suggestion');
+        const suggestionText = document.getElementById('suggestions-text');
         const flagCategories = {
             'All': ['all'],
             'Most Recognized': ['10_most_recognized', '30_most_recognized', '50_most_recognized'],
@@ -792,6 +904,7 @@ button:hover {
             countriesRemaining = 0;
             guessedCountries = 0;
             countriesRemainingElement.textContent = countriesRemaining;
+            suggestionsButton.style.display = 'none';
             startTimer();
             hidePlaceholderFlag();
 
@@ -815,6 +928,7 @@ button:hover {
             countryNameElement.style.display = 'none';
             inputElement.value = '';
             placeholderFlag.style.display = 'none';
+            suggestionsButton.style.display = 'none';
 
             modeButton.style.display = 'none';
 
@@ -1038,6 +1152,7 @@ button:hover {
         function goBack() {
             flagSelectionScreen.style.display = 'flex';
             gameWrapper.style.display = 'none';
+            suggestionsButton.style.display = 'block';
             resetGameState();
         }
 
@@ -1096,6 +1211,75 @@ button:hover {
             nextFlagElement.style.display = 'block';
 
         }
+
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get elements
+            const suggestionsButton = document.getElementById('suggestions-button');
+            const suggestionsModal = document.getElementById('suggestions-modal');
+            const closeModal = document.getElementById('close-modal');
+            const sendSuggestionButton = document.getElementById('send-suggestion');
+            const suggestionText = document.getElementById('suggestions-text');
+            
+            // Event listeners
+            suggestionsButton.addEventListener('click', () => {
+                suggestionsModal.style.display = 'block';
+            });
+            
+            closeModal.addEventListener('click', () => {
+                suggestionsModal.style.display = 'none';
+            });
+            
+            sendSuggestionButton.addEventListener('click', () => {
+                //const suggestion = suggestionText.value.trim();
+                const suggestion = suggestionText.value;
+                if (suggestion) {
+                    // Send the suggestion to the server
+                    fetch('/submit_suggestion', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ suggestion })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            console.log('Suggestion/error submitted:', data.message);
+                            suggestionText.value = ''; // Clear the textarea
+                            suggestionsModal.style.display = 'none'; // Hide the modal
+                            alert('Submitted successfully. Thank you!');
+                        } else if (data.error) {
+                            throw new Error(data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error submitting suggestion:', error);
+                        alert('There was an error submitting your suggestion. Please try again later.');
+                    });
+                } else {
+                    alert('Please enter a suggestion before sending.');
+                }
+            });
+            
+            // Hide the modal when clicking outside of it
+            window.addEventListener('click', (event) => {
+                if (event.target == suggestionsModal) {
+                    suggestionsModal.style.display = 'none';
+                }
+            });
+            
+            
+            // Attach startGame, startLearn, and goBack to their respective buttons or triggers
+            // Example:
+            const modeButton = document.getElementById('mode-button');
+            if (modeButton) {
+                modeButton.addEventListener('click', () => {
+                    startGame();
+                });
+            }
+        });
     </script>
 
 </body>
