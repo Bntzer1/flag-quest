@@ -852,6 +852,12 @@ button:hover {
                 }
                 subgroupButtons.appendChild(button);
             });
+            const changeModeButton = document.createElement('button');
+            changeModeButton.textContent = 'Change Mode';
+            changeModeButton.onclick = () => {
+                window.location.href = `/`;
+            };
+            subgroupButtons.appendChild(changeModeButton);
             subgroupsDiv.style.display = 'block';
         }
 
@@ -1270,15 +1276,6 @@ button:hover {
                 }
             });
             
-            
-            // Attach startGame, startLearn, and goBack to their respective buttons or triggers
-            // Example:
-            const modeButton = document.getElementById('mode-button');
-            if (modeButton) {
-                modeButton.addEventListener('click', () => {
-                    startGame();
-                });
-            }
         });
     </script>
 
