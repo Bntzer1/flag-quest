@@ -615,7 +615,7 @@ button:hover {
                 'countries_that_drive_on_the_left'
             ],
             'Time-based': ['newest_countries', 'oldest_national_flags'],
-            'Other': ['test', 'us_states']
+            'Other': ['us_states']
         };
 
         let currentCountry = '';
@@ -752,7 +752,12 @@ button:hover {
             }
             subgroups.forEach(subgroup => {
                 const button = document.createElement('button');
-                button.textContent = subgroup.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                if (subgroup === 'us_states') {
+                    // put the text in the button as "US States" instead of "us_states"
+                    button.textContent = 'US States';
+                } else {
+                    button.textContent = subgroup.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                }
                 button.onclick = () => selectFlagGroup(subgroup);
                 subgroupButtons.appendChild(button);
             });
