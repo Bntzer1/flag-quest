@@ -1100,11 +1100,18 @@ button:hover {
             if (!isLearnMode) {
                 saveTime(continentSelect.value, time);
             }
-            window.location.href = `/final_screen?time=${time}&continent=${continentSelect.value}&learn=${isLearnMode}`;
+
+            // Store data in sessionStorage
+            sessionStorage.setItem('currentTime', time);
+            sessionStorage.setItem('continent', continentSelect.value);
+            sessionStorage.setItem('isLearnMode', isLearnMode);
+
+            window.location.href = `/final_screen`;
             fetch('/reset')
                 .then(response => response.json())
                 .then(data => console.log(data.message));
         }
+
 
         function saveTime(continent, time) {
             let times = JSON.parse(localStorage.getItem(`${continent}_times`) || '[]');

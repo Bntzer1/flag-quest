@@ -281,8 +281,8 @@
             </div>
 
             <div class="buttons">
-                <button id="retry-button" onclick="window.location.href='/flag_guesser?continent={{ continent }}'">Play Again</button>
-                <button onclick="window.location.href='/'">Change Mode</button>
+                <button id="retry-button" onclick="resetAndRetry()">Play Again</button>
+                <button onclick="resetAndChangeMode()">Change Mode</button>
             </div>
         </div>
     </div>
@@ -301,10 +301,11 @@
 
 
     <script>
+
         document.addEventListener('DOMContentLoaded', function() {
-            const continent = "{{ continent }}";
-            let currentTime = "{{ time }}";
-            const isLearnMode = {{ learn | tojson }}; // Convert Python bool to JS bool
+            const continent = sessionStorage.getItem('continent');
+            let currentTime = sessionStorage.getItem('currentTime');
+            const isLearnMode = sessionStorage.getItem('isLearnMode') === 'true';
 
             const continentDisplayNames = {
                 "all": "All Countries",
@@ -398,99 +399,95 @@
                 }
             }
 
+
             function checkAndSubmitGlobalScore() {
-                // Check if the score has already been submitted to avoid duplicate prompts
-                let submittedScores = JSON.parse(localStorage.getItem('submittedScores') || '[]');
-                if (!submittedScores.includes(`${continent}_${currentTime}`)) {
-                    fetch('/check_score', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ category: continent, time: currentTime })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.is_top5) {
-                            // Show the custom modal
-                            const top5Modal = document.getElementById('top5-score-modal');
-                            const closeTop5Modal = document.getElementById('close-top5-modal');
-                            const submitScoreButton = document.getElementById('submit-score-button');
-                            const playerNameInput = document.getElementById('player-name');
-                            const modalMessage = document.getElementById('top5-modal-message');
+            // Proceed to check and submit the score
+            fetch('/check_score', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ category: continent, time: currentTime })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.is_top5) {
+                    // Show the custom modal
+                    const top5Modal = document.getElementById('top5-score-modal');
+                    const closeTop5Modal = document.getElementById('close-top5-modal');
+                    const submitScoreButton = document.getElementById('submit-score-button');
+                    const playerNameInput = document.getElementById('player-name');
+                    const modalMessage = document.getElementById('top5-modal-message');
 
-                            // Update modal message with the category name
-                            modalMessage.innerHTML = `You achieved a top 5 global score in <strong>${continentDisplayName}</strong>!`;
+                    // Update modal message with the category name
+                    modalMessage.innerHTML = `You achieved a top 5 global score in <strong>${continentDisplayName}</strong>!`;
 
-                            // Retrieve player's name from localStorage
-                            const storedName = localStorage.getItem('playerName') || '';
-                            playerNameInput.value = storedName;
+                    // Retrieve player's name from localStorage
+                    const storedName = localStorage.getItem('playerName') || '';
+                    playerNameInput.value = storedName;
 
-                            top5Modal.style.display = 'block';
+                    top5Modal.style.display = 'block';
 
-                            // Remove any previous event listeners
-                            closeTop5Modal.onclick = null;
-                            submitScoreButton.onclick = null;
-                            window.onclick = null;
+                    // Remove any previous event listeners
+                    closeTop5Modal.onclick = null;
+                    submitScoreButton.onclick = null;
+                    window.onclick = null;
 
-                            // Close modal when 'X' is clicked
-                            closeTop5Modal.onclick = function() {
-                                top5Modal.style.display = 'none';
-                                loadGlobalLeaderboard(continent);
-                            };
+                    // Close modal when 'X' is clicked
+                    closeTop5Modal.onclick = function() {
+                        top5Modal.style.display = 'none';
+                        loadGlobalLeaderboard(continent);
+                    };
 
-                            // Close modal when clicking outside of it
-                            window.onclick = function(event) {
-                                if (event.target == top5Modal) {
-                                    top5Modal.style.display = 'none';
-                                    loadGlobalLeaderboard(continent);
-                                }
-                            };
-
-                            // Handle score submission
-                            submitScoreButton.onclick = function() {
-                                const name = playerNameInput.value.trim();
-                                if (name) {
-                                    fetch('/submit_score', {
-                                        method: 'POST',
-                                        headers: {'Content-Type': 'application/json'},
-                                        body: JSON.stringify({ category: continent, time: currentTime, name: name })
-                                    })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (data.success) {
-                                            top5Modal.style.display = 'none';
-                                            // Add to submittedScores to avoid re-submission
-                                            submittedScores.push(`${continent}_${currentTime}`);
-                                            localStorage.setItem('submittedScores', JSON.stringify(submittedScores));
-                                            localStorage.setItem('playerName', name); // Save player's name
-                                            loadGlobalLeaderboard(continent, name);
-                                        } else {
-                                            alert('Error recording your score.');
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('Error submitting score:', error);
-                                        alert('There was an error submitting your score. Please try again later.');
-                                    });
-                                } else {
-                                    alert('Please enter your name.');
-                                }
-                            };
-                        } else {
-                            // Not a top 5 score, just load the global leaderboard
+                    // Close modal when clicking outside of it
+                    window.onclick = function(event) {
+                        if (event.target == top5Modal) {
+                            top5Modal.style.display = 'none';
                             loadGlobalLeaderboard(continent);
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error checking global leaderboard:', error);
-                        // Still load the global leaderboard
-                        loadGlobalLeaderboard(continent);
-                    });
+                    };
+
+                    // Handle score submission
+                    submitScoreButton.onclick = function() {
+                        const name = playerNameInput.value.trim();
+                        if (name) {
+                            fetch('/submit_score', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({ category: continent, time: currentTime, name: name })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    let submittedScores = JSON.parse(localStorage.getItem('submittedScores') || '[]');
+                                    submittedScores.push(`${continent}_${currentTime}`);
+                                    localStorage.setItem('submittedScores', JSON.stringify(submittedScores));
+                                    top5Modal.style.display = 'none';
+                                    localStorage.setItem('playerName', name); // Save player's name
+                                    sessionStorage.removeItem('currentTime');
+                                    sessionStorage.removeItem('continent');
+                                    loadGlobalLeaderboard(continent, name);
+                                } else {
+                                    alert('Error recording your score.');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error submitting score:', error);
+                                alert('There was an error submitting your score. Please try again later.');
+                            });
+                        } else {
+                            alert('Please enter your name.');
+                        }
+                    };
                 } else {
-                    // Score already submitted, load the global leaderboard
-                    const storedName = localStorage.getItem('playerName') || '';
-                    loadGlobalLeaderboard(continent, storedName);
+                    // Not a top 5 score, just load the global leaderboard
+                    loadGlobalLeaderboard(continent);
                 }
-            }
+            })
+            .catch(error => {
+                console.error('Error checking global leaderboard:', error);
+                // Still load the global leaderboard
+                loadGlobalLeaderboard(continent);
+            });
+        }
 
             function loadGlobalLeaderboard(category, userName = '') {
                 // Fetch global leaderboard
@@ -533,6 +530,21 @@
                     });
             }
         });
+
+        function resetAndRetry() {
+            if (sessionStorage.getItem('isLearnMode') === 'true') {
+                window.location.href = '/flag_guesser?mode=learn';
+            } else {
+                const continent = sessionStorage.getItem('continent');
+                window.location.href = `/flag_guesser?mode=solo`;
+            }
+            sessionStorage.removeItem('isLearnMode');
+        }
+
+        function resetAndChangeMode() {
+            window.location.href = '/';
+        }
+
     </script>
 </body>
 </html>
