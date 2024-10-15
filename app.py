@@ -6,6 +6,8 @@ from countries import countries_by_continent
 import os
 import smtplib
 from email.message import EmailMessage
+import json
+import threading
 
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -94,7 +96,7 @@ def get_flag():
         'countries_with_green_primary_color': 'countries_with_green_primary_color',
         'countries_with_white_primary_color': 'countries_with_white_primary_color',
         'countries_with_blue_primary_color': 'countries_with_blue_primary_color',
-        'countries_with_yellow_primary_color': 'countries_with_yellow_primary_color'
+        'countries_with_yellow_primary_color': 'countries_with_yellow_primary_color',
     }
 
     # Use the mapping, or default to the original subgroup
@@ -181,6 +183,89 @@ def send_email(suggestion):
         smtp.ehlo()
         smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
         smtp.send_message(msg)
+
+leaderboard_lock = threading.Lock()
+LEADERBOARD_FILE = 'leaderboard.json'
+
+def load_leaderboard():
+    try:
+        with open(LEADERBOARD_FILE, 'r') as f:
+            leaderboard = json.load(f)
+    except FileNotFoundError:
+        leaderboard = {}
+    return leaderboard
+
+def save_leaderboard(leaderboard):
+    with leaderboard_lock:
+        with open(LEADERBOARD_FILE, 'w') as f:
+            json.dump(leaderboard, f)
+
+def parse_time_to_ms(time_str):
+    try:
+        minutes, seconds, hundredths = time_str.split(':')
+        total_ms = (int(minutes) * 60000) + (int(seconds) * 1000) + (int(hundredths) * 10)
+        return total_ms
+    except ValueError:
+        return None
+    
+@app.route('/check_score', methods=['POST'])
+def check_score():
+    data = request.get_json()
+    category = data.get('category')
+    time = data.get('time')
+
+    if not category or not time:
+        return jsonify({'error': 'Invalid data'}), 400
+
+    leaderboard = load_leaderboard()
+    scores = leaderboard.get(category, [])
+    time_ms = parse_time_to_ms(time)
+
+    is_top5 = False
+    if len(scores) < 5:
+        is_top5 = True
+    else:
+        worst_time_ms = parse_time_to_ms(scores[-1]['time'])
+        if time_ms < worst_time_ms:
+            is_top5 = True
+
+    return jsonify({'is_top5': is_top5})
+
+@app.route('/submit_score', methods=['POST'])
+def submit_score():
+    data = request.get_json()
+    category = data.get('category')
+    time = data.get('time')
+    name = data.get('name')
+
+    if not category or not time or not name:
+        return jsonify({'error': 'Invalid data'}), 400
+
+    leaderboard = load_leaderboard()
+    scores = leaderboard.get(category, [])
+
+    # Add the new score
+    scores.append({'name': name, 'time': time})
+
+    # Sort and keep top 5
+    scores.sort(key=lambda x: parse_time_to_ms(x['time']))
+    scores = scores[:5]
+
+    leaderboard[category] = scores
+    save_leaderboard(leaderboard)
+
+    return jsonify({'success': True})
+
+@app.route('/get_leaderboard', methods=['GET'])
+def get_leaderboard():
+    category = request.args.get('category')
+    if not category:
+        return jsonify({'error': 'Category not specified'}), 400
+
+    leaderboard = load_leaderboard()
+    scores = leaderboard.get(category, [])
+
+    return jsonify({'leaderboard': scores})
 
 
 def generate_room_code():

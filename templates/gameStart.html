@@ -4,8 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>flag.quest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
+        /* Importing Variables and Fonts */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+        
+
 
         :root {
             --bg-color: #1a1a1a;
@@ -16,6 +21,7 @@
             --input-border: #444;
         }
 
+        /* General Styles */
         body {
             font-family: 'Poppins', sans-serif;
             background-color: var(--bg-color);
@@ -39,6 +45,7 @@
             gap: 2rem;
         }
 
+        /* Welcome Container Styles */
         .welcome-container {
             background-color: var(--input-bg);
             padding: 1.5rem 1.6rem;
@@ -46,7 +53,7 @@
             width: 100%;
             max-width: 400px;
             text-align: center;
-            margin-bottom: 15rem;
+            margin-bottom: 5rem; /* Adjusted margin-bottom */
         }
 
         .welcome-text {
@@ -55,34 +62,235 @@
             margin: 0;
         }
 
+        /* Mode Selection Buttons */
         #mode-selection {
             display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
             justify-content: center;
-            width: 100%;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap; /* Allows wrapping on smaller screens */
         }
 
-        button {
-            flex: 1 1 200px;
-            max-width: 250px;
-            padding: 1rem;
-            background-color: var(--primary-color);
-            color: #ffffff;
+        /* Mode Selection Buttons */
+        .mode-button {
+            background-color: #2196F3; /* Blue color */
             border: none;
-            border-radius: 5px;
-            font-size: 2em;
+            color: white;
+            padding: 20px 40px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            border-radius: 10px;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
+            transition: background-color 0.3s ease;
+            flex: 1; /* Make buttons take equal available space */
+            max-width: 300x; /* Limit maximum width */
+            box-sizing: border-box;
         }
 
-        button:hover {
-            background-color: #2980b9;
+        .mode-button:hover {
+            background-color: #0b7dda;
         }
 
-        button:active {
-            transform: scale(0.98);
+
+        /* Leaderboard Button */
+        #leaderboard-button {
+            background-color: #2196F3; /* Blue */
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            text-align: center;
+            font-size: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
         }
+
+        #leaderboard-button:hover {
+            background-color: #0b7dda;
+        }
+
+        /* Leaderboard Modal */
+        #leaderboard-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+        }
+
+        .modal-content {
+            background-color: var(--input-bg);
+            margin: 5% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 10px;
+            position: relative;
+            color: var(--text-color);
+        }
+
+        #close-leaderboard-modal {
+            color: #aaaaaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #close-leaderboard-modal:hover,
+        #close-leaderboard-modal:focus {
+            color: #ffffff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-content h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-content select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .leaderboard-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .leaderboard-column {
+            width: 48%;
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .leaderboard-column h3 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #e0e0e0;
+        }
+
+        /* Leaderboard List Items */
+        .leaderboard-column ol {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .leaderboard-column li {
+            padding: 10px 0;
+            border-bottom: 1px solid #444;
+            color: #ccc;
+            display: flex;
+            align-items: center;
+        }
+
+        .leaderboard-column li:last-child {
+            border-bottom: none;
+        }
+
+        .rank-number {
+            font-weight: bold;
+            color: #fff;
+            margin-right: 10px;
+            width: 30px;
+            text-align: right;
+        }
+
+        .leaderboard-column li span {
+            display: inline-block;
+        }
+
+
+
+        /* Top 5 Score Modal Styles */
+        #top5-score-modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        #top5-score-modal .modal-content {
+            background-color: var(--input-bg);
+            margin: 10% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 10px;
+            position: relative;
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        #close-top5-modal {
+            color: #aaaaaa;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #close-top5-modal:hover,
+        #close-top5-modal:focus {
+            color: #ffffff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #top5-score-modal h2 {
+            margin-top: 0;
+        }
+
+        #top5-score-modal input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            margin: 15px 0;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+        }
+
+        #submit-score-button {
+            background-color: #2196F3;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #submit-score-button:hover {
+            background-color: #0b7dda;
+        }
+
 
         @media (max-width: 600px) {
             .content-wrapper {
@@ -96,6 +304,21 @@
             button {
                 flex-basis: 100%;
             }
+            .leaderboard-container {
+                flex-direction: column;
+            }
+
+            .leaderboard-column {
+                width: 100%;
+            }
+            #mode-selection {
+                flex-direction: column;
+            }
+
+            .mode-button {
+                max-width: none;
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -104,16 +327,340 @@
         <div class="welcome-container">
             <h1 class="welcome-text">flag.quest</h1>
         </div>
+
         <div id="mode-selection">
-            <button onclick="selectMode('learn')">Learn</button>
-            <button onclick="selectMode('solo')">Solo</button>
+            <button class="mode-button" onclick="selectMode('solo')">Solo</button>
+            <button class="mode-button" onclick="selectMode('learn')">Learn</button>
+        </div>        
+
+        <button id="leaderboard-button">Leaderboards</button>
+
+        <!-- Leaderboard Modal -->
+        <div id="leaderboard-modal" class="modal">
+            <div class="modal-content">
+                <span id="close-leaderboard-modal">&times;</span>
+                <h2>Leaderboards</h2>
+                <select id="leaderboard-category-select">
+                    <!-- Options will be added dynamically -->
+                </select>
+                <div class="leaderboard-container">
+                    <div class="leaderboard-column">
+                        <h3>Local Top 5 Times</h3>
+                        <ol id="local-leaderboard-list"></ol>
+                    </div>
+                    <div class="leaderboard-column">
+                        <h3>Global Top 5 Times</h3>
+                        <ol id="global-leaderboard-list"></ol>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+    <!-- Top 5 Score Modal -->
+        <div id="top5-score-modal" class="modal">
+            <div class="modal-content">
+                <span id="close-top5-modal">&times;</span>
+                <h2>Congratulations!</h2>
+                <p id="top5-modal-message">You achieved a top 5 global score!</p>
+                <label for="player-name">Please enter your name:</label>
+                <input type="text" id="player-name" placeholder="Your Name" />
+                <button id="submit-score-button">Submit Score</button>
+            </div>
+        </div>
+
 
     <script>
         function selectMode(mode) {
             window.location.href = `/flag_guesser?mode=${mode}`;
         }
+
+        const leaderboardButton = document.getElementById('leaderboard-button');
+        const leaderboardModal = document.getElementById('leaderboard-modal');
+        const closeLeaderboardModal = document.getElementById('close-leaderboard-modal');
+        const leaderboardCategorySelect = document.getElementById('leaderboard-category-select');
+        const localLeaderboardList = document.getElementById('local-leaderboard-list');
+        const globalLeaderboardList = document.getElementById('global-leaderboard-list');
+
+        // Populate the category select options
+        const continentDisplayNames = {
+            "all": "All Countries",
+            "10_most_recognized": "Top 10 Most Recognized Flags",
+            "30_most_recognized": "Top 30 Most Recognized Flags",
+            "50_most_recognized": "Top 50 Most Recognized Flags",
+            "africa": "Africa",
+            "asia": "Asia",
+            "europe": "Europe",
+            "north_america": "North America",
+            "south_america": "South America",
+            "oceania": "Oceania",
+            "flags_with_unique_shapes": "Flags with Unique Shapes",
+            "flags_with_animals": "Flags with Animals",
+            "flags_with_stars": "Flags with Stars",
+            "countries_with_tricolor_flags": "Countries with Tricolor Flags",
+            "countries_with_crosses_on_their_flags": "Countries with Crosses on their Flags",
+            "countries_with_crescent_moon_on_their_flags": "Countries with Crescent Moon on their Flags",
+            "countries_with_union_jack_in_their_flags": "Countries with Union Jack in their Flags",
+            "countries_with_suns_on_their_flags": "Countries with Suns on their Flags",
+            "countries_with_vertical_stripes_on_their_flags": "Countries with Vertical Stripes on their Flags",
+            "countries_with_horizontal_stripes_on_their_flags": "Countries with Horizontal Stripes on their Flags",
+            "countries_with_red_primary_color": "Countries with Red Primary Color",
+            "countries_with_green_primary_color": "Countries with Green Primary Color",
+            "countries_with_white_primary_color": "Countries with White Primary Color",
+            "countries_with_blue_primary_color": "Countries with Blue Primary Color",
+            "countries_with_yellow_primary_color": "Countries with Yellow Primary Color",
+            "landlocked_countries": "Landlocked Countries",
+            "island_nations": "Island Nations",
+            "microstates": "Microstates",
+            "countries_with_only_one_bordering_country": "Countries with Only One Bordering Country",
+            "countries_with_coastlines_on_multiple_oceans": "Countries with Coastlines on Multiple Oceans",
+            "opec_members": "OPEC Members",
+            "monarchies": "Monarchies",
+            "olympic_host_nations": "Olympic Host Nations",
+            "g20_countries": "G20 Countries",
+            "commonwealth_nations": "Commonwealth Nations",
+            "brics_countries": "BRICS Countries",
+            "european_union": "European Union",
+            "asean_countries": "ASEAN Countries",
+            "nordic_countries": "Nordic Countries",
+            "caribbean_nations": "Caribbean Nations",
+            "pacific_island_nations": "Pacific Island Nations",
+            "arab_league": "Arab League",
+            "former_soviet_republics": "Former Soviet Republics",
+            "countries_that_drive_on_the_left": "Countries that Drive on the Left",
+            "newest_countries": "Newest Countries",
+            "oldest_national_flags": "Oldest National Flags",
+            "us_states": "US States"
+        };
+
+        localStorage.setItem('asia_times', JSON.stringify(['0:45:30', '1:15:20']));
+
+
+
+
+        // Populate the category select options
+        for (const [value, displayName] of Object.entries(continentDisplayNames)) {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = displayName;
+            leaderboardCategorySelect.appendChild(option);
+        }
+
+        leaderboardButton.addEventListener('click', () => {
+            leaderboardModal.style.display = 'block';
+            loadLeaderboard(leaderboardCategorySelect.value);
+        });
+
+        closeLeaderboardModal.addEventListener('click', () => {
+            leaderboardModal.style.display = 'none';
+        });
+
+        leaderboardCategorySelect.addEventListener('change', () => {
+            loadLeaderboard(leaderboardCategorySelect.value);
+        });
+
+        function loadLeaderboard(category) {
+            // Fetch global leaderboard
+            fetch(`/get_leaderboard?category=${category}`)
+                .then(response => response.json())
+                .then(data => {
+                    const leaderboard = data.leaderboard;
+                    globalLeaderboardList.innerHTML = '';
+                    if (leaderboard.length === 0) {
+                        globalLeaderboardList.innerHTML = '<li>No global scores yet.</li>';
+                    } else {
+                        leaderboard.forEach((entry, index) => {
+                            const li = document.createElement('li');
+
+                            // Add medal for top 3
+                            let medal = '';
+                            if (index === 0) {
+                                medal = '🥇 '; // Gold Medal
+                            } else if (index === 1) {
+                                medal = '🥈 '; // Silver Medal
+                            } else if (index === 2) {
+                                medal = '🥉 '; // Bronze Medal
+                            }
+
+                            li.innerHTML = `<span class="rank-number">${index + 1}.</span> ${medal}${entry.name}: ${entry.time}`;
+                            globalLeaderboardList.appendChild(li);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading global leaderboard:', error);
+                });
+
+            // Load local leaderboard
+            let times = JSON.parse(localStorage.getItem(`${category}_times`) || '[]');
+            localLeaderboardList.innerHTML = '';
+            if (times.length === 0) {
+                localLeaderboardList.innerHTML = '<li>No local scores yet.</li>';
+            } else {
+                times.forEach((time, index) => {
+                    const li = document.createElement('li');
+                    // Display rank number without medals
+                    li.innerHTML = `<span class="rank-number">${index + 1}.</span> ${time}`;
+                    localLeaderboardList.appendChild(li);
+                });
+            }
+        }
+
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (event) => {
+            if (event.target == leaderboardModal) {
+                leaderboardModal.style.display = 'none';
+            }
+        });
+
+        function updateGlobalLeaderboard() {
+            // Get the list of categories from the leaderboard.json structure
+            const categories = [
+                "all", "10_most_recognized", "30_most_recognized", "50_most_recognized",
+                "africa", "asia", "europe", "north_america", "south_america", "oceania",
+                "flags_with_unique_shapes", "flags_with_animals", "flags_with_stars",
+                "countries_with_tricolor_flags", "countries_with_crosses_on_their_flags",
+                "countries_with_crescent_moon_on_their_flags", "countries_with_union_jack_in_their_flags",
+                "countries_with_suns_on_their_flags", "countries_with_vertical_stripes_on_their_flags",
+                "countries_with_horizontal_stripes_on_their_flags", "countries_with_red_primary_color",
+                "countries_with_green_primary_color", "countries_with_white_primary_color",
+                "countries_with_blue_primary_color", "countries_with_yellow_primary_color",
+                "landlocked_countries", "island_nations", "microstates",
+                "countries_with_only_one_bordering_country", "countries_with_coastlines_on_multiple_oceans",
+                "opec_members", "monarchies", "olympic_host_nations", "g20_countries",
+                "commonwealth_nations", "brics_countries", "european_union", "asean_countries",
+                "nordic_countries", "caribbean_nations", "pacific_island_nations", "arab_league",
+                "former_soviet_republics", "countries_that_drive_on_the_left", "newest_countries",
+                "oldest_national_flags", "us_states"
+            ];
+
+            let categoryIndex = 0; // To track the current category being processed
+
+            function processNextCategory() {
+                if (categoryIndex >= categories.length) {
+                    return; // All categories processed
+                }
+
+                const category = categories[categoryIndex];
+                categoryIndex++;
+
+                let localTimes = JSON.parse(localStorage.getItem(`${category}_times`) || '[]');
+
+                if (localTimes.length > 0) {
+                    let timeIndex = 0;
+
+                    function processNextTime() {
+                        if (timeIndex >= localTimes.length) {
+                            processNextCategory(); // Move to next category
+                            return;
+                        }
+
+                        const localTime = localTimes[timeIndex];
+                        timeIndex++;
+
+                        // Check if the score has already been submitted to avoid duplicate prompts
+                        let submittedScores = JSON.parse(localStorage.getItem('submittedScores') || '[]');
+                        if (submittedScores.includes(`${category}_${localTime}`)) {
+                            processNextTime();
+                            return; // Skip if already submitted
+                        }
+
+                        fetch('/check_score', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ category: category, time: localTime })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.is_top5) {
+                                // Show the custom modal
+                                const top5Modal = document.getElementById('top5-score-modal');
+                                const closeTop5Modal = document.getElementById('close-top5-modal');
+                                const submitScoreButton = document.getElementById('submit-score-button');
+                                const playerNameInput = document.getElementById('player-name');
+                                const modalMessage = document.getElementById('top5-modal-message');
+
+                                // Update modal message with the category name
+                                modalMessage.innerHTML = `You achieved a top 5 global score in <strong>${continentDisplayNames[category]}</strong>!`;
+
+                                // Clear any previous input
+                                playerNameInput.value = '';
+
+                                top5Modal.style.display = 'block';
+
+                                // Remove any previous event listeners
+                                closeTop5Modal.onclick = null;
+                                submitScoreButton.onclick = null;
+                                window.onclick = null;
+
+                                // Close modal when 'X' is clicked
+                                closeTop5Modal.onclick = function() {
+                                    top5Modal.style.display = 'none';
+                                    processNextTime();
+                                };
+
+                                // Close modal when clicking outside of it
+                                window.onclick = function(event) {
+                                    if (event.target == top5Modal) {
+                                        top5Modal.style.display = 'none';
+                                        processNextTime();
+                                    }
+                                };
+
+                                // Handle score submission
+                                submitScoreButton.onclick = function() {
+                                    const name = playerNameInput.value.trim();
+                                    if (name) {
+                                        fetch('/submit_score', {
+                                            method: 'POST',
+                                            headers: {'Content-Type': 'application/json'},
+                                            body: JSON.stringify({ category: category, time: localTime, name: name })
+                                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.success) {
+                                                top5Modal.style.display = 'none';
+                                                // Add to submittedScores to avoid re-submission
+                                                submittedScores.push(`${category}_${localTime}`);
+                                                localStorage.setItem('submittedScores', JSON.stringify(submittedScores));
+                                                processNextTime();
+                                            } else {
+                                                alert('Error recording your score.');
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error('Error submitting score:', error);
+                                            alert('There was an error submitting your score. Please try again later.');
+                                        });
+                                    } else {
+                                        alert('Please enter your name.');
+                                    }
+                                };
+                            } else {
+                                // Score is not top 5; proceed to next time
+                                processNextTime();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error checking global leaderboard:', error);
+                            processNextTime();
+                        });
+                    }
+
+                    processNextTime();
+                } else {
+                    processNextCategory(); // No local times for this category; proceed to next category
+                }
+            }
+
+            processNextCategory();
+        }
+
+        // Call the function when the page loads
+        window.onload = function() {
+            updateGlobalLeaderboard();
+        };
+
     </script>
 </body>
 </html>

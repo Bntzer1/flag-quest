@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>flag.quest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
 /* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
@@ -404,23 +405,32 @@ button:hover {
     position: fixed;
     top: 20px;
     right: 40px;
-    padding: 12px 15px;
-    width: 8%;
+    padding: 12px;
+    width: auto;
+    height: auto;
+    aspect-ratio: 1 / 1;
     background: linear-gradient(135deg, var(--primary-color), #2980b9);
     color: #ffffff;
     border: none;
-    border-radius: 5%;
-    font-size: 0.7em;
+    border-radius: 50%;
+    font-size: 1.2em;
     cursor: pointer;
     z-index: 1000;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #suggestions-button:hover {
     background: linear-gradient(135deg, #2980b9, var(--primary-color));
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+#suggestions-button i {
+    line-height: 1;
 }
 
 /* Suggestions Modal */
@@ -548,14 +558,17 @@ button:hover {
     </style>
 </head>
 <body>
-    <button id="suggestions-button">Suggestions or Errors</button>
+    <button id="suggestions-button">
+        <i class="fas fa-envelope" aria-hidden="true"></i>
+        <span class="sr-only">Suggestions or Errors</span>
+      </button>
 
     <!-- Suggestions Modal -->
     <div id="suggestions-modal">
         <div class="modal-content">
             <span id="close-modal">&times;</span>
-            <h2>Send Suggestion/Error</h2>
-            <textarea id="suggestions-text" placeholder="Type your suggestion/error here..."></textarea>
+            <h2>Report an error or send a suggestion:</h2>
+            <textarea id="suggestions-text" placeholder="Type your error/suggestion here..."></textarea>
             <button id="send-suggestion">Send</button>
         </div>
     </div>
