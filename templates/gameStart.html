@@ -11,7 +11,6 @@
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
         
 
-
         :root {
             --bg-color: #1a1a1a;
             --text-color: #f0f0f0;
@@ -84,7 +83,7 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
             flex: 1; /* Make buttons take equal available space */
-            max-width: 300x; /* Limit maximum width */
+            max-width: 300px; /* Corrected from '300x' to '300px' */
             box-sizing: border-box;
         }
 
@@ -370,9 +369,34 @@
 
 
     <script>
+        // Function to handle mode selection
         function selectMode(mode) {
             window.location.href = `/flag_guesser?mode=${mode}`;
         }
+
+        // Function to handle resetting submittedScores on first launch
+        function initializeSubmittedScores() {
+            // Check if the user has launched the game before
+            const hasLaunched = localStorage.getItem('hasLaunched');
+
+            if (!hasLaunched) {
+                // It's the first launch, reset submittedScores
+                localStorage.setItem('submittedScores', JSON.stringify([]));
+                console.log('submittedScores has been initialized to an empty array.');
+
+                // Set the flag to indicate that the user has launched the game
+                localStorage.setItem('hasLaunched', 'true');
+            } else {
+                // Not the first launch, do not reset submittedScores
+                console.log('submittedScores exists and will not be reset.');
+            }
+        }
+
+        // Call the initialize function once when the page loads
+        window.addEventListener('DOMContentLoaded', (event) => {
+            initializeSubmittedScores();
+            updateGlobalLeaderboard();
+        });
 
         const leaderboardButton = document.getElementById('leaderboard-button');
         const leaderboardModal = document.getElementById('leaderboard-modal');
@@ -431,8 +455,6 @@
             "oldest_national_flags": "Oldest National Flags",
             "us_states": "US States"
         };
-
-
 
         // Populate the category select options
         for (const [value, displayName] of Object.entries(continentDisplayNames)) {
@@ -501,14 +523,6 @@
                 });
             }
         }
-
-
-        // Close modal when clicking outside
-        window.addEventListener('click', (event) => {
-            if (event.target == leaderboardModal) {
-                leaderboardModal.style.display = 'none';
-            }
-        });
 
         function updateGlobalLeaderboard() {
             // Get the list of categories from the leaderboard.json structure
@@ -653,10 +667,8 @@
             processNextCategory();
         }
 
-        // Call the function when the page loads
-        window.onload = function() {
-            updateGlobalLeaderboard();
-        };
+        // Function to handle resetting submittedScores on first launch is already defined above
+        // It is called on DOMContentLoaded
 
     </script>
 </body>

@@ -1,5 +1,6 @@
-from flask import Flask, render_template, jsonify, request, send_from_directory
+from flask import Flask, render_template, jsonify, request, send_from_directory, session
 from flask_socketio import SocketIO, emit, join_room, leave_room
+from flask_session import Session
 import string
 import random
 from countries import countries_by_continent
@@ -13,23 +14,44 @@ app = Flask(__name__, static_url_path='/static', static_folder='static')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 socketio = SocketIO(app)
 
-recent_countries = []
+app.secret_key = os.environ.get('SECRET_KEY')
+
+app.config['SESSION_TYPE'] = 'filesystem' # Use filesystem for session storage
+Session(app)
 
 # flags with errors: nepal, switzerland, israel, solomon islands
 
 # solo, learn, race
 
 def get_random_country(continent):
-    global recent_countries
+    
+    # Initialize 'recent_countries' in session if not present
+    if 'recent_countries' not in session:
+        session['recent_countries'] = []
+
+    recent_countries = session['recent_countries']
+
     countries = countries_by_continent.get(continent, countries_by_continent['all'])
+
+    # Reset 'recent_countries' if all countries have been used
     if len(recent_countries) >= len(countries):
-        recent_countries.clear()
+        recent_countries = []
+
+    # Filter out recently used countries
     eligible_countries = [c for c in countries if c['name'] not in recent_countries]
+
+    # If no eligible countries are left, reset 'recent_countries'
     if not eligible_countries:
-        recent_countries.clear()
+        recent_countries = []
         eligible_countries = countries
+
+    # Select a random country from eligible countries
     country = random.choice(eligible_countries)
     recent_countries.append(country['name'])
+
+    # Update the session with the new 'recent_countries' list
+    session['recent_countries'] = recent_countries
+
     return country
 
 @app.route('/')
@@ -137,9 +159,7 @@ def final_screen():
 
 @app.route('/reset')
 def reset():
-    global recent_countries
-    recent_countries.clear()
-
+    session.pop('recent_countries', None)
     return jsonify({"message": "Reset successful"})
 
 @app.route('/static/<path:filename>')

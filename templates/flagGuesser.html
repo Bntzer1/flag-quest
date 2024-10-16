@@ -48,6 +48,8 @@ body {
     text-align: center;
     width: 100%;
     box-sizing: border-box;
+    overflow: visible;
+    z-index: 2;
 }
 
 .header {
@@ -394,6 +396,7 @@ button:hover {
     object-fit: cover;
     background-color: #f0f0f0;
     position: absolute;
+    transition: opacity 0.5s ease-in-out;
     top: 0;
     left: 0;
     width: 100%;
@@ -547,7 +550,6 @@ button:hover {
     .checkmark {
         font-size: 14vw;
     }
-}
 
 .checkmark.hidden {
     opacity: 0;
@@ -663,7 +665,6 @@ button:hover {
         <div class="btn-group" style="width:100%">
             <button style="width:100%" id="mode-button">Start</button>
         </div>
-    </div>
 </div>
 
 
@@ -924,7 +925,6 @@ button:hover {
             guessedCountries = 0;
             countriesRemainingElement.textContent = countriesRemaining;
             suggestionsButton.style.display = 'none';
-            startTimer();
             hidePlaceholderFlag();
 
             isFirstFlag = true;
@@ -932,10 +932,11 @@ button:hover {
             modeButton.style.display = 'none';
             autocompleteContainer.style.display = 'block';
 
-            const getFlag = debounce(() => {
+            // Start the countdown before fetching the new flag
+            startCountdown(() => {
                 getNewFlag();
-            }, 100);
-            getFlag();
+                startTimer();
+            });
         }
 
         function startLearn() {
@@ -945,15 +946,48 @@ button:hover {
             timerElement.style.display = 'none';
             revealButton.style.display = 'inline-block';
             countryNameElement.style.display = 'none';
-            inputElement.value = '';
+            hidePlaceholderFlag();
             placeholderFlag.style.display = 'none';
             suggestionsButton.style.display = 'none';
 
             modeButton.style.display = 'none';
 
             isFirstFlag = true;
-            hidePlaceholderFlag();
-            getNewFlag();
+            startCountdown(() => {
+                getNewFlag();
+            });
+        }
+
+        function startCountdown(callback) {
+            let countdownNumber = 3;
+            const countdownElement = document.createElement('div');
+            countdownElement.id = 'countdown';
+            countdownElement.textContent = countdownNumber;
+
+            // Style the countdown element
+            countdownElement.style.position = 'absolute';
+            countdownElement.style.top = '50%';
+            countdownElement.style.left = '50%';
+            countdownElement.style.transform = 'translate(-50%, -50%)';
+            countdownElement.style.fontSize = '5em';
+            countdownElement.style.color = 'white';
+            countdownElement.style.textAlign = 'center';
+            countdownElement.style.textShadow = '2px 2px 4px rgba(0,0,0,0.7)';
+            countdownElement.style.zIndex = '10'; // Ensure it's above other elements
+
+            const flagOutlineElement = document.getElementById('flag-outline');
+            flagOutlineElement.appendChild(countdownElement);
+
+            const intervalId = setInterval(() => {
+                countdownNumber--;
+                if (countdownNumber > 0) {
+                    countdownElement.textContent = countdownNumber;
+                } else {
+                    clearInterval(intervalId);
+                    flagOutlineElement.removeChild(countdownElement);
+                    callback(); // Call getNewFlag() after countdown
+                }
+            }, 1000);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1232,6 +1266,7 @@ button:hover {
         }
 
         function hidePlaceholderFlag() {
+            placeholderFlag.style.opacity = '0';
             placeholderFlag.style.display = 'none';
             currentFlagElement.style.display = 'block';
             nextFlagElement.style.display = 'block';
@@ -1247,6 +1282,10 @@ button:hover {
             const closeModal = document.getElementById('close-modal');
             const sendSuggestionButton = document.getElementById('send-suggestion');
             const suggestionText = document.getElementById('suggestions-text');
+
+            fetch('/reset')
+                .then(response => response.json())
+                .then(data => console.log(data.message));
             
             // Event listeners
             suggestionsButton.addEventListener('click', () => {
@@ -1297,6 +1336,7 @@ button:hover {
             });
             
         });
+
     </script>
 
 </body>
