@@ -573,7 +573,6 @@
                         let submittedScores = JSON.parse(localStorage.getItem('submittedScores') || '[]');
                         if (submittedScores.includes(`${category}_${localTime}`)) {
                             processNextTime();
-                            return; // Skip if already submitted
                         }
 
                         fetch('/check_score', {
@@ -634,6 +633,7 @@
                                                 // Add to submittedScores to avoid re-submission
                                                 submittedScores.push(`${category}_${localTime}`);
                                                 localStorage.setItem('submittedScores', JSON.stringify(submittedScores));
+                                                localStorage.setItem(`submitted_${category}_${localTime}`, 'true');
                                                 processNextTime();
                                             } else {
                                                 alert('Error recording your score.');

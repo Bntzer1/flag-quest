@@ -1,5 +1,5 @@
 from flask import Flask, render_template, jsonify, request, send_from_directory, session
-from flask_socketio import SocketIO, emit, join_room, leave_room
+#from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask_session import Session
 import string
 import random
@@ -9,10 +9,12 @@ import smtplib
 from email.message import EmailMessage
 import json
 import threading
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-socketio = SocketIO(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace('postgres://', 'postgresql://')
+db = SQLAlchemy(app)
 
 app.secret_key = os.environ.get('SECRET_KEY')
 
@@ -24,7 +26,7 @@ Session(app)
 # solo, learn, race
 
 def get_random_country(continent):
-    
+
     # Initialize 'recent_countries' in session if not present
     if 'recent_countries' not in session:
         session['recent_countries'] = []
@@ -204,21 +206,25 @@ def send_email(suggestion):
         smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
         smtp.send_message(msg)
 
-leaderboard_lock = threading.Lock()
-LEADERBOARD_FILE = 'leaderboard.json'
+class LeaderboardEntry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    time_str = db.Column(db.String(20), nullable=False)
+    time_ms = db.Column(db.Integer, nullable=False)
 
-def load_leaderboard():
-    try:
-        with open(LEADERBOARD_FILE, 'r') as f:
-            leaderboard = json.load(f)
-    except FileNotFoundError:
-        leaderboard = {}
-    return leaderboard
+    def __repr__(self):
+        return f"<LeaderboardEntry {self.name} - {self.time_str}>"
 
-def save_leaderboard(leaderboard):
-    with leaderboard_lock:
-        with open(LEADERBOARD_FILE, 'w') as f:
-            json.dump(leaderboard, f)
+
+def get_leaderboard_entries(category):
+    return LeaderboardEntry.query.filter_by(category=category).order_by(LeaderboardEntry.time_ms).limit(5).all()
+
+def is_top5_score(category, time_ms):
+    entries = get_leaderboard_entries(category)
+    if len(entries) < 5:
+        return True
+    return time_ms < entries[-1].time_ms
 
 def parse_time_to_ms(time_str):
     try:
@@ -232,49 +238,52 @@ def parse_time_to_ms(time_str):
 def check_score():
     data = request.get_json()
     category = data.get('category')
-    time = data.get('time')
+    time_str = data.get('time')
 
-    if not category or not time:
+    if not category or not time_str:
         return jsonify({'error': 'Invalid data'}), 400
 
-    leaderboard = load_leaderboard()
-    scores = leaderboard.get(category, [])
-    time_ms = parse_time_to_ms(time)
+    time_ms = parse_time_to_ms(time_str)
+    if time_ms is None:
+        return jsonify({'error': 'Invalid time format'}), 400
 
-    is_top5 = False
-    if len(scores) < 5:
-        is_top5 = True
-    else:
-        worst_time_ms = parse_time_to_ms(scores[-1]['time'])
-        if time_ms < worst_time_ms:
-            is_top5 = True
+    is_top5 = is_top5_score(category, time_ms)
 
     return jsonify({'is_top5': is_top5})
+
 
 @app.route('/submit_score', methods=['POST'])
 def submit_score():
     data = request.get_json()
     category = data.get('category')
-    time = data.get('time')
+    time_str = data.get('time')
     name = data.get('name')
 
-    if not category or not time or not name:
+    if not category or not time_str or not name:
         return jsonify({'error': 'Invalid data'}), 400
 
-    leaderboard = load_leaderboard()
-    scores = leaderboard.get(category, [])
+    time_ms = parse_time_to_ms(time_str)
+    if time_ms is None:
+        return jsonify({'error': 'Invalid time format'}), 400
+
+    # Check if the score is a top 5 score
+    if not is_top5_score(category, time_ms):
+        return jsonify({'error': 'Score is not in the top 5'}), 400
 
     # Add the new score
-    scores.append({'name': name, 'time': time})
+    new_entry = LeaderboardEntry(category=category, name=name, time_str=time_str, time_ms=time_ms)
+    db.session.add(new_entry)
+    db.session.commit()
 
-    # Sort and keep top 5
-    scores.sort(key=lambda x: parse_time_to_ms(x['time']))
-    scores = scores[:5]
-
-    leaderboard[category] = scores
-    save_leaderboard(leaderboard)
+    # Keep only the top 5 scores
+    entries = get_leaderboard_entries(category)
+    excess_entries = LeaderboardEntry.query.filter_by(category=category).order_by(LeaderboardEntry.time_ms.desc()).offset(5).all()
+    for entry in excess_entries:
+        db.session.delete(entry)
+    db.session.commit()
 
     return jsonify({'success': True})
+
 
 @app.route('/get_leaderboard', methods=['GET'])
 def get_leaderboard():
@@ -282,10 +291,11 @@ def get_leaderboard():
     if not category:
         return jsonify({'error': 'Category not specified'}), 400
 
-    leaderboard = load_leaderboard()
-    scores = leaderboard.get(category, [])
+    entries = get_leaderboard_entries(category)
+    leaderboard = [{'name': entry.name, 'time': entry.time_str} for entry in entries]
 
-    return jsonify({'leaderboard': scores})
+    return jsonify({'leaderboard': leaderboard})
+
 
 
 def generate_room_code():

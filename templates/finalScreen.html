@@ -401,6 +401,11 @@
 
 
             function checkAndSubmitGlobalScore() {
+                const alreadySubmitted = localStorage.getItem(`submitted_${continent}_${currentTime}`);
+                if (alreadySubmitted) {
+                    loadGlobalLeaderboard(continent);
+                    return;
+                }
             // Proceed to check and submit the score
             fetch('/check_score', {
                 method: 'POST',
@@ -458,10 +463,15 @@
                             .then(data => {
                                 if (data.success) {
                                     let submittedScores = JSON.parse(localStorage.getItem('submittedScores') || '[]');
+                                    if (submittedScores.includes(`${continent}_${currentTime}`)) {
+                                        loadGlobalLeaderboard(continent);
+                                        return;s
+                                    }
                                     submittedScores.push(`${continent}_${currentTime}`);
                                     localStorage.setItem('submittedScores', JSON.stringify(submittedScores));
                                     top5Modal.style.display = 'none';
                                     localStorage.setItem('playerName', name); // Save player's name
+                                    localStorage.setItem(`submitted_${continent}_${currentTime}`, 'true');
                                     sessionStorage.removeItem('currentTime');
                                     sessionStorage.removeItem('continent');
                                     loadGlobalLeaderboard(continent, name);
