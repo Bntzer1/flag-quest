@@ -10,11 +10,14 @@ from email.message import EmailMessage
 import json
 import threading
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace('postgres://', 'postgresql://')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 app.secret_key = os.environ.get('SECRET_KEY')
 
@@ -215,7 +218,6 @@ class LeaderboardEntry(db.Model):
 
     def __repr__(self):
         return f"<LeaderboardEntry {self.name} - {self.time_str}>"
-
 
 def get_leaderboard_entries(category):
     return LeaderboardEntry.query.filter_by(category=category).order_by(LeaderboardEntry.time_ms).limit(5).all()
