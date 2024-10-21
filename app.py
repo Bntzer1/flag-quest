@@ -299,6 +299,33 @@ def get_leaderboard():
 
     return jsonify({'leaderboard': leaderboard})
 
+@app.route('/remove_duplicates', methods=['POST'])
+def remove_duplicates():
+    from sqlalchemy import func
+    subquery = db.session.query(
+        LeaderboardEntry.category,
+        LeaderboardEntry.name,
+        LeaderboardEntry.time_str,
+        func.min(LeaderboardEntry.id).label('min_id')
+    ).group_by(
+        LeaderboardEntry.category,
+        LeaderboardEntry.name,
+        LeaderboardEntry.time_str
+    ).subquery()
+
+    duplicates = LeaderboardEntry.query.join(
+        subquery,
+        (LeaderboardEntry.category == subquery.c.category) &
+        (LeaderboardEntry.name == subquery.c.name) &
+        (LeaderboardEntry.time_str == subquery.c.time_str) &
+        (LeaderboardEntry.id != subquery.c.min_id)
+    ).all()
+
+    for entry in duplicates:
+        db.session.delete(entry)
+    db.session.commit()
+    return jsonify({'success': True, 'removed': len(duplicates)})
+
 
 
 def generate_room_code():

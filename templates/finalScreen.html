@@ -450,6 +450,8 @@
                         }
                     };
 
+                    let submittedScores = JSON.parse(localStorage.getItem('submittedScores') || '[]');
+
                     // Handle score submission
                     submitScoreButton.onclick = function() {
                         const name = playerNameInput.value.trim();
@@ -462,7 +464,6 @@
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success) {
-                                    let submittedScores = JSON.parse(localStorage.getItem('submittedScores') || '[]');
                                     if (submittedScores.includes(`${continent}_${currentTime}`)) {
                                         loadGlobalLeaderboard(continent);
                                         return;s

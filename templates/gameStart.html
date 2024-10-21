@@ -547,6 +547,8 @@
 
             let categoryIndex = 0; // To track the current category being processed
 
+            let submittedScores = JSON.parse(localStorage.getItem('submittedScores') || '[]');
+
             function processNextCategory() {
                 if (categoryIndex >= categories.length) {
                     return; // All categories processed
@@ -570,9 +572,9 @@
                         timeIndex++;
 
                         // Check if the score has already been submitted to avoid duplicate prompts
-                        let submittedScores = JSON.parse(localStorage.getItem('submittedScores') || '[]');
                         if (submittedScores.includes(`${category}_${localTime}`)) {
                             processNextTime();
+                            return;
                         }
 
                         fetch('/check_score', {
@@ -633,7 +635,6 @@
                                                 // Add to submittedScores to avoid re-submission
                                                 submittedScores.push(`${category}_${localTime}`);
                                                 localStorage.setItem('submittedScores', JSON.stringify(submittedScores));
-                                                localStorage.setItem(`submitted_${category}_${localTime}`, 'true');
                                                 processNextTime();
                                             } else {
                                                 alert('Error recording your score.');
