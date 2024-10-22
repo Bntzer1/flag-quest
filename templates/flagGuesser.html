@@ -125,7 +125,8 @@ body {
     padding-bottom: 60%; /* 3:5 aspect ratio */
     border: 2px solid var(--input-border);
     border-radius: 8px;
-    margin: 20px 0;
+    margin: 20px auto;
+    margin-top: 12px;
     position: relative;
     overflow: hidden;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
@@ -161,7 +162,7 @@ input[type="text"], select {
     font-size: 1em;
     background-color: var(--input-bg);
     color: var(--text-color);
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     box-sizing: border-box;
     transition: border-color 0.3s, box-shadow 0.3s;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
@@ -179,7 +180,7 @@ input[type="text"]:focus, select:focus {
     left: 0;
     font-size: 1em;
     color: #888;
-    padding: 10px 15px;
+    padding: 8px 15px;
     width: 100%;
     box-sizing: border-box;
     text-align: left;
@@ -190,7 +191,7 @@ input[type="text"]:focus, select:focus {
 }
 
 .suggestion-item {
-    padding: 5px 10px;
+    padding: 3px 10px;
     cursor: pointer;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -245,7 +246,7 @@ button:hover {
     position: relative;
     height: 50px;
     width: 100%;
-    margin: 20px 0;
+    margin: 10px 0;
 }
 
 #timer {
@@ -554,7 +555,7 @@ button:hover {
 .checkmark.hidden {
     opacity: 0;
 }
-
+}
 
 
     </style>
@@ -662,7 +663,7 @@ button:hover {
             <input type="text" id="country-input" placeholder="Type country name" autocomplete="off">
             <div id="suggestion-text" class="suggestion-text"></div>
         </div>
-        <div class="btn-group" style="width:100%">
+        <div class="btn-group" style="width: 100%">
             <button style="width:100%" id="mode-button">Start</button>
         </div>
 </div>
@@ -758,6 +759,7 @@ button:hover {
         let selectedIndex = -1;
         let flagCheckInterval;
         let currentFacts = [];
+        let showSuggestions = false;
 
         inputElement.addEventListener('input', onInputChange);
         inputElement.addEventListener('keydown', onInputKeyDown);
@@ -786,11 +788,12 @@ button:hover {
             const query = inputElement.value.toLowerCase();
             const selectedContinent = continentSelect.value;
 
-            if (query.length >= 3) {
+            if (query.length >= 1 && showSuggestions) {
                 fetch(`/get_suggestions?query=${query}&continent=${selectedContinent}`)
                     .then(response => response.json())
                     .then(data => {
-                        suggestionsList = data;
+                        // Limit the suggestions to a maximum of three
+                        suggestionsList = data.slice(0, 3);
                         showSuggestion();
                         selectedIndex = -1;
                     });
@@ -936,6 +939,7 @@ button:hover {
             startCountdown(() => {
                 getNewFlag();
                 startTimer();
+                showSuggestions = true;
             });
         }
 
@@ -951,10 +955,12 @@ button:hover {
             suggestionsButton.style.display = 'none';
 
             modeButton.style.display = 'none';
+            autocompleteContainer.style.display = 'block';
 
             isFirstFlag = true;
             startCountdown(() => {
                 getNewFlag();
+                showSuggestions = true;
             });
         }
 
@@ -1229,6 +1235,7 @@ button:hover {
             modeButton.style.display = 'inline-block';
 
             autocompleteContainer.style.display = 'none';
+            showSuggestions = false;
 
             timerElement.style.display = 'block';
             revealButton.style.display = 'none';

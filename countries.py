@@ -249,7 +249,7 @@ countries_by_continent = {
         "The star on the flag represents the five main classes in Vietnamese society"
         ]},
         {"name": "Turkey", "flag": "https://flagcdn.com/w2560/tr.png", "aliases": [], "facts": [
-        "Istanbul is the only city in the world that straddles two continents",
+        "Turkey's capital of Istanbul is the only city in the world that straddles two continents",
         "The star and crescent on the flag are traditional symbols of Islam"
         ]},
         {"name": "Iran", "flag": "https://flagcdn.com/w2560/ir.png", "aliases": [], "facts": [
