@@ -70,31 +70,6 @@ body {
     text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
 }
 
-#countries-remaining-container {
-    position: relative;
-    padding: 10px 15px;
-    background: linear-gradient(135deg, var(--secondary-color), #7f8c8d);
-    border-radius: 5px;
-    color: #ffffff;
-    text-align: center;
-    align-items: center;
-    display: flex;
-    margin: auto;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-#countries-remaining-container h2 {
-    font-size: 1em;
-    margin: 0 0 5px;
-    text-align: center;
-}
-
-#countries-remaining {
-    font-size: 1.5em;
-    font-weight: bold;
-    color: #1a1a1a;
-    text-align: center;
-}
 
 #flag-facts-container {
     position: absolute;
@@ -508,6 +483,71 @@ button:hover {
     box-shadow: 0 6px 12px rgba(0,0,0,0.2);
 }
 
+#progress-container {
+    position: relative;
+    padding: 10px 15px;
+    background: linear-gradient(135deg, var(--secondary-color), #7f8c8d);
+    border-radius: 5px;
+    color: #ffffff;
+    text-align: center;
+    width: 60%;
+    margin: auto;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+#progress-container h2 {
+    font-size: 1em;
+    margin: 0 0 10px;
+    text-align: center;
+}
+
+#progress-bar-wrapper {
+    position: relative;
+    width: 100%;
+    height: 30px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+#progress-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #e74c3c 0%, #f39c12 50%, #2ecc71 100%);
+    background-size: 200% 100%;
+    background-position: 0% 0%;
+    border-radius: 15px;
+    transition: width 0.5s ease-out, background-position 0.5s ease-out;
+    box-shadow: 0 2px 8px rgba(46, 204, 113, 0.3);
+}
+
+#progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #ffffff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    z-index: 1;
+}
+
+/* Pulse animation when progress updates */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.progress-pulse {
+    animation: pulse 0.3s ease-in-out;
+}
+
 
 @media (max-width: 768px) {
     .back-button {
@@ -544,17 +584,28 @@ button:hover {
         font-size: 1em;
     }
 
-    #countries-remaining {
+    /* #countries-remaining {
         font-size: 1.2em;
-    }
+    } */
 
     .checkmark {
         font-size: 14vw;
     }
 
-.checkmark.hidden {
-    opacity: 0;
-}
+    .checkmark.hidden {
+        opacity: 0;
+    }
+    #progress-container {
+            width: 80%;
+    }
+        
+    #progress-bar-wrapper {
+        height: 25px;
+    }
+    
+    #progress-text {
+        font-size: 0.9em;
+    }
 }
 
 
@@ -589,9 +640,12 @@ button:hover {
         <button id="back-button" class="back-button" onclick="goBack()">←</button>
     </div>
     <div class="container">
-        <div id="countries-remaining-container" style="width:40%">
-            <h2>Flags Remaining</h2>
-            <div id="countries-remaining">0</div>
+        <div id="progress-container">
+            <h2>Progress</h2>
+            <div id="progress-bar-wrapper">
+                <div id="progress-bar"></div>
+                <div id="progress-text">0 / 0</div>
+            </div>
         </div>
         <div id="timer-learn">
             <div id="timer">00:00:00</div>
@@ -677,7 +731,9 @@ button:hover {
         const modeButton = document.getElementById('mode-button');
         const continentSelect = document.getElementById('continent-select');
         const timerElement = document.getElementById('timer');
-        const countriesRemainingElement = document.getElementById('countries-remaining');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const progressBarWrapper = document.getElementById('progress-bar-wrapper');
         const countryNameElement = document.getElementById('country-name');
         const revealButton = document.getElementById('reveal-button');
         const currentFlagElement = document.getElementById('flag-current');
@@ -915,18 +971,20 @@ button:hover {
             gameWrapper.style.display = 'block';
             continentSelect.value = subgroup;
             continentSelect.style.display = 'none';
+            totalCountries = 0;
 
             modeButton.style.display = 'inline-block';
-            countriesRemainingContainer.style.display = 'block';
+            resetGameState();
+            document.getElementById('progress-container').style.display = 'block';
 
-            autocompleteContainer.style.display = 'none';
-            showPlaceholderFlag();
+            // autocompleteContainer.style.display = 'none';
+            // showPlaceholderFlag();
         }
 
         function startGame() {
             countriesRemaining = 0;
             guessedCountries = 0;
-            countriesRemainingElement.textContent = countriesRemaining;
+            updateProgressBar();
             suggestionsButton.style.display = 'none';
             hidePlaceholderFlag();
 
@@ -946,7 +1004,8 @@ button:hover {
         function startLearn() {
             isLearnMode = true;
             countriesRemaining = 0;
-            countriesRemainingElement.textContent = countriesRemaining;
+            guessedCountries = 0;
+            updateProgressBar();
             timerElement.style.display = 'none';
             revealButton.style.display = 'inline-block';
             countryNameElement.style.display = 'none';
@@ -1021,7 +1080,7 @@ button:hover {
 
                     if (guessedCountries === 0) {
                         countriesRemaining = totalCountries;
-                        countriesRemainingElement.textContent = countriesRemaining;
+                        updateProgressBar();
                     }
 
                     inputElement.value = '';
@@ -1118,7 +1177,7 @@ button:hover {
         function handleCorrectGuess() {
             guessedCountries++;
             countriesRemaining--;
-            countriesRemainingElement.textContent = countriesRemaining;
+            updateProgressBar();
             
 
             checkmark.classList.replace('hidden', 'visible');
@@ -1135,7 +1194,7 @@ button:hover {
             const time = timerElement.innerText;
             guessedCountries = 0;
             countriesRemaining = 0;
-            countriesRemainingElement.textContent = countriesRemaining;
+            updateProgressBar();
 
             if (!isLearnMode) {
                 saveTime(continentSelect.value, time);
@@ -1226,8 +1285,8 @@ button:hover {
             resetTimer();
             countriesRemaining = 0;
             guessedCountries = 0;
-            countriesRemainingElement.textContent = countriesRemaining;
-            countriesRemainingContainer.style.display = 'none';
+            updateProgressBar();
+            document.getElementById('progress-container').style.display = 'none';
             fetch('/reset')
                 .then(response => response.json())
                 .then(data => console.log(data.message));
@@ -1278,6 +1337,27 @@ button:hover {
             currentFlagElement.style.display = 'block';
             nextFlagElement.style.display = 'block';
 
+        }
+
+        function updateProgressBar() {
+            const progress = totalCountries > 0 ? ((guessedCountries / totalCountries) * 100) : 0;
+            
+            // Update bar width
+            progressBar.style.width = `${progress}%`;
+            
+            // Update bar color based on progress
+            progressBar.style.backgroundPosition = `${progress}% 0%`;
+            
+            // Update text
+            progressText.textContent = `${guessedCountries} / ${totalCountries}`;
+            
+            // Add pulse animation
+            if (guessedCountries !== 0) {
+                progressBarWrapper.classList.add('progress-pulse');
+                setTimeout(() => {
+                    progressBarWrapper.classList.remove('progress-pulse');
+                }, 300);
+            }
         }
 
 
