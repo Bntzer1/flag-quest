@@ -73,6 +73,8 @@ def game_start():
 @app.route("/flag_guesser")
 def flag_guesser():
     mode = request.args.get("mode", "solo")
+    if mode == "globe":
+        return render_template("flagGuesserGlobe.html")
     return render_template("flagGuesser.html", mode=mode, show_selection=True)
 
 

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>flag.quest — Globe Mode (Globe.gl)</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<!--  Globe.gl + Three.js  -->
+<script src="https://unpkg.com/three@0.161.0/build/three.min.js"></script>
+<script src="https://unpkg.com/globe.gl@2.37.0/dist/globe.gl.min.js"></script>
+
+<style>
+:root{--bg:#1a1a1a;--text:#f0f0f0;--accent:#3498db;--wrong:#e74c3c;--correct:#2ecc71}
+*{box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{margin:0;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh}
+/* ───────────────────────────  Top Bar  ────────────────────────── */
+#flag-holder{height:88px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid #333;gap:1.1rem}
+#flag-holder img{max-height:76px;max-width:140px;object-fit:contain;display:none}
+#difficulty-controls{display:flex;align-items:center;gap:.75rem}
+.diff-btn{background:none;border:1px solid #555;color:var(--text);padding:.45rem 1.1rem;border-radius:6px;font-weight:600;cursor:pointer;opacity:.6;transition:background .2s,opacity .2s}
+.diff-btn.selected{background:var(--accent);color:#fff;opacity:1}
+#start-btn{background:var(--accent);border:none;color:#fff;font-weight:600;font-size:1rem;padding:.5rem 1.8rem;border-radius:8px;cursor:pointer}
+#start-btn:disabled{opacity:.4;cursor:not-allowed}
+/* ───────────────────────────  Globe  ─────────────────────────── */
+#earth_div{flex:1 1 auto;position:relative;overflow:hidden;cursor:pointer}
+#earth_div canvas{position:absolute;inset:0}
+/* ───────────────────────────  Bottom Bar  ────────────────────── */
+#guess-bar{height:70px;display:flex;align-items:center;justify-content:center;border-top:1px solid #333;z-index:10;background:var(--bg)}
+#guess-btn{background:var(--accent);border:none;color:#fff;font-weight:600;font-size:1.1rem;padding:.6rem 2.2rem;border-radius:8px;cursor:pointer;opacity:.4;transition:opacity .2s}
+#guess-btn:enabled{opacity:1}
+/* ───────────────────────────  Result Banner  ─────────────────── */
+#result-banner{position:absolute;top:95px;left:50%;transform:translateX(-50%);padding:.4rem .9rem;border-radius:6px;font-weight:600;display:none}
+</style>
+</head>
+<body>
+  <div id="flag-holder">
+    <div id="difficulty-controls">
+      <button class="diff-btn selected" data-level="easy">Easy</button>
+      <button class="diff-btn" data-level="medium">Medium</button>
+      <button class="diff-btn" data-level="hard">Hard</button>
+      <button id="start-btn">Start</button>
+    </div>
+    <img id="flag-img" />
+  </div>
+  <div id="earth_div"></div>
+  <div id="guess-bar"><button id="guess-btn" disabled>Guess</button></div>
+  <div id="result-banner"></div>
+
+<script>
+/* ========================= 0. ISO‑3 ➜ ISO‑2 map (trimmed) ========================= */
+const ISO3to2 = {/* trimmed for brevity, same as before */
+AFG:'af',ALB:'al',DZA:'dz',ARG:'ar',ARM:'am',AUS:'au',AUT:'at',AZE:'az',BEL:'be',BGD:'bd',BGR:'bg',BRA:'br',CAN:'ca',CHL:'cl',CHN:'cn',COL:'co',CRI:'cr',CZE:'cz',DEU:'de',DNK:'dk',DOM:'do',ECU:'ec',EGY:'eg',ESP:'es',EST:'ee',FIN:'fi',FRA:'fr',GHA:'gh',GRC:'gr',HRV:'hr',HUN:'hu',IDN:'id',IND:'in',IRL:'ie',IRN:'ir',ISL:'is',ISR:'il',ITA:'it',JPN:'jp',KAZ:'kz',KEN:'ke',KOR:'kr',LBN:'lb',LKA:'lk',LTU:'lt',LUX:'lu',MAR:'ma',MEX:'mx',MYS:'my',NGA:'ng',NLD:'nl',NOR:'no',NZL:'nz',PAK:'pk',PER:'pe',PHL:'ph',POL:'pl',PRT:'pt',QAT:'qa',ROU:'ro',RUS:'ru',SAU:'sa',SDN:'sd',SEN:'sn',SGP:'sg',SVK:'sk',SVN:'si',SWE:'se',THA:'th',TUN:'tn',TUR:'tr',TZA:'tz',UGA:'ug',UKR:'ua',USA:'us',VEN:'ve',VNM:'vn',ZAF:'za',ZMB:'zm',ZWE:'zw',ETH:'et',COD:'cd',AGO:'ao',MOZ:'mz',MDG:'mg',CMR:'cm',CIV:'ci',NER:'ne',BFA:'bf',MLI:'ml',MWI:'mw',TCD:'td',SOM:'so',GIN:'gn',RWA:'rw',BEN:'bj',BDI:'bi',SSD:'ss',TGO:'tg',SLE:'sl',LBY:'ly',COG:'cg',LBR:'lr',CAF:'cf',MRT:'mr',ERI:'er',NAM:'na',GMB:'gm',BWA:'bw',GAB:'ga',LSO:'ls',GNB:'gw',GNQ:'gq',MUS:'mu',SWZ:'sz',DJI:'dj',COM:'km',CPV:'cv',STP:'st',SYC:'sc',YEM:'ye',NPL:'np',PRK:'kp',SYR:'sy',KHM:'kh',JOR:'jo',ARE:'ae',TJK:'tj',LAO:'la',KGZ:'kg',TKM:'tm',OMN:'om',PSE:'ps',KWT:'kw',GEO:'ge',MNG:'mn',BHR:'bh',TLS:'tl',CYP:'cy',BTN:'bt',MDV:'mv',BRN:'bn',GBR:'gb',BLR:'by',SRB:'rs',CHE:'ch',MKD:'mk',LVA:'lv',MNE:'me',MLT:'mt',AND:'ad',MCO:'mc',LIE:'li',SMR:'sm',VAT:'va',GTM:'gt',HTI:'ht',CUB:'cu',HND:'hn',SLV:'sv',NIC:'ni',PAN:'pa',JAM:'jm',TTO:'tt',BHS:'bs',BLZ:'bz',BRB:'bb',LCA:'lc',GRD:'gd',VCT:'vc',ATG:'ag',KNA:'kn',DMA:'dm',BOL:'bo',PRY:'py',URY:'uy',GUY:'gy',SUR:'sr',PNG:'pg',FJI:'fj',SLB:'sb',FSM:'fm',VUT:'vu',WSM:'ws',KIR:'ki',TON:'to',MHL:'mh',PLW:'pw',TUV:'tv',NRU:'nr',WLS:'gb-wls'};
+
+/* ========================= 1. Difficulty groups ========================= */
+const EASY_ISO3 = ['USA','GBR','CAN','AUS','FRA','DEU','JPN','CHN','RUS','BRA','ITA','MEX','IND','ESP','KOR','ARG','ZAF','SWE','NLD','NZL'];
+const MEDIUM_ISO3 = [...EASY_ISO3,'NOR','DNK','FIN','IRL','CHE','AUT','BEL','PRT','POL','GRC','TUR','SAU','ISR','EGY','ARE','THA','IDN','MYS','SGP','PAK','VNM','PHL','COL','PER','CHL','VEN','KEN','NGA','ETH','UGA','TZA','KAZ','UKR','ROU','CZE','HUN','SVK','SVN','HRV','EST','LVA','LTU','ARG','BOL','PRY','URY','SEN','GHA','MAR'];
+const EASY_ISO3to2   = Object.fromEntries(EASY_ISO3.map(c=>[c,ISO3to2[c]]));
+const MEDIUM_ISO3to2 = Object.fromEntries(MEDIUM_ISO3.map(c=>[c,ISO3to2[c]]));
+
+/* ========================= 2. DOM refs & constants ========================= */
+const flagImg  = document.getElementById('flag-img');
+const guessBtn = document.getElementById('guess-btn');
+const banner   = document.getElementById('result-banner');
+const ACCENT   = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+const WRONG    = getComputedStyle(document.documentElement).getPropertyValue('--wrong');
+const CORRECT  = getComputedStyle(document.documentElement).getPropertyValue('--correct');
+
+const diffButtons = [...document.querySelectorAll('.diff-btn')];
+const startBtn    = document.getElementById('start-btn');
+let difficulty = 'easy';
+
+diffButtons.forEach(btn=>btn.addEventListener('click',()=>{
+  diffButtons.forEach(b=>b.classList.toggle('selected',b===btn));
+  difficulty = btn.dataset.level;
+}));
+
+/* ========================= 3. Build the Globe ========================= */
+const WORLD_BLUE = 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg';
+//const WORLD_BLUE = 'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-blue-marble.jpg';
+const WORLD_TOPOLOGY = 'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-topology.png';
+const globe = Globe()(document.getElementById('earth_div'))
+  .globeImageUrl(WORLD_BLUE)
+  .backgroundImageUrl('//cdn.jsdelivr.net/npm/three-globe/example/img/night-sky.png')
+  .bumpImageUrl(null)
+  .showAtmosphere(false)
+  .backgroundColor('#000')
+  .polygonAltitude(0.002)
+  .polygonCapColor(()=> 'rgba(0,0,0,0)')
+  .polygonSideColor(()=> 'rgba(0,0,0,0)')
+  .polygonStrokeColor(()=> 'rgba(255,255,255,0.18)')
+  .polygonsTransitionDuration(0);
+
+globe.controls().autoRotate = false;
+globe.controls().enableZoom = true;
+
+/* ========================= 4. GeoJSON + helpers ========================= */
+let polyData = [];
+let queue = [];
+let current = null;
+let selected = null;
+let strikes = 0;
+let wrongGuesses = [];
+let correctPoly = null;
+
+function hasFlag(f){
+  const iso3 = (f.id || f.properties.iso_a3 || '').toUpperCase().replace(/-.*/, '');
+  return ISO3to2.hasOwnProperty(iso3);
+}
+function hasEasyFlag(f){
+  const iso3 = (f.id || f.properties.iso_a3 || '').toUpperCase().replace(/-.*/, '');
+  return EASY_ISO3to2.hasOwnProperty(iso3);
+}
+function hasMediumFlag(f){
+  const iso3 = (f.id || f.properties.iso_a3 || '').toUpperCase().replace(/-.*/, '');
+  return MEDIUM_ISO3to2.hasOwnProperty(iso3);
+}
+function buildQueue(){
+  let filter = hasFlag;
+  if(difficulty==='easy') filter = hasEasyFlag;
+  if(difficulty==='medium') filter = hasMediumFlag;
+  queue = polyData.filter(filter).sort(()=>Math.random()-0.5);
+}
+
+fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
+  .then(r=>r.json())
+  .then(gj=>{
+    polyData = gj.features.filter(f=>f.properties.name!=='Antarctica').filter(hasFlag);
+    globe.polygonsData(polyData); // show all countries always
+  });
+
+/* ========================= 5. Styling helpers ========================= */
+function refreshStyles(){
+  globe
+    .polygonCapColor(f=>{
+      if(correctPoly && f===correctPoly) return 'rgba(46,204,113,0.55)'; // green
+      if(wrongGuesses.includes(f))       return 'rgba(231,76,60,0.55)';  // red
+      if(f===selected)                   return ACCENT;                  // blue accent for hover/selection
+      return 'rgba(0,0,0,0)';
+    })
+    .polygonStrokeColor(f=>{
+      if(correctPoly && f===correctPoly) return CORRECT;
+      if(wrongGuesses.includes(f))       return WRONG;
+      if(f===selected)                   return ACCENT;
+      return 'rgba(255,255,255,0.18)';
+    })
+    .polygonAltitude(f=>{
+      if(correctPoly && f===correctPoly) return 0.02;
+      if(wrongGuesses.includes(f))       return 0.006;
+      if(f===selected)                   return 0.006;
+      return 0.002;
+    });
+}
+
+function showBanner(txt,bg){
+  banner.textContent = txt;
+  banner.style.background = bg;
+  banner.style.display = 'block';
+  setTimeout(()=>banner.style.display='none',1200);
+}  
+function flagPath(iso3){if(!iso3)return '/static/flags/unknown.png';const plain=iso3.replace(/-.*/, '').toUpperCase();const iso2=ISO3to2[plain]||ISO3to2[plain.slice(0,2)];return iso2?`/static/flags/${iso2.toLowerCase()}.png`:'/static/flags/unknown.png';}
+
+/* ──────────────────────────────────────────────────────────────── */
+/* 6.  Game flow                                                   */
+/* ──────────────────────────────────────────────────────────────── */
+function nextFlag(){selected=null;strikes=0;wrongGuesses=[];guessBtn.disabled=true;if(!queue.length){alert('🎉 All done!');location.reload();return;}current=queue.pop();flagImg.src=flagPath(current.id||current.properties.iso_a3);refreshStyles();}
+
+/* ──────────────────────────────────────────────────────────────── */
+/* 7.  Interaction handlers                                        */
+/* ──────────────────────────────────────────────────────────────── */
+startBtn.addEventListener('click',()=>{document.getElementById('difficulty-controls').style.display='none';flagImg.style.display='block';buildQueue();nextFlag();});
+
+globe.onPolygonClick((poly)=>{if(!poly)return;selected=poly;refreshStyles();guessBtn.disabled=false;});
+
+guessBtn.addEventListener('click',()=>{if(!selected)return;const correct=(selected===current);if(correct){showBanner('Correct!','#2ecc71');queue.length&&setTimeout(nextFlag,900);}else{strikes++;wrongGuesses.push(selected);showBanner(`Wrong (${strikes}/3)`,WRONG);if(strikes>=3){refreshStyles();setTimeout(nextFlag,1200);}else{guessBtn.disabled=true;selected=null;refreshStyles();}}});
+</script>
+</body>
+</html>
