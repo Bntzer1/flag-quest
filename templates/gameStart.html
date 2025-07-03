@@ -4,113 +4,312 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>flag.quest</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    
+    <!-- GSAP for animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/CSSRulePlugin.min.js"></script>
+    
     <style>
-        /* Importing Variables and Fonts */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-        
-
         :root {
-            --bg-color: #1a1a1a;
-            --text-color: #f0f0f0;
-            --primary-color: #3498db;
-            --secondary-color: #95a5a6;
-            --input-bg: #2c2c2c;
-            --input-border: #444;
+            --bg-gradient-1: #0f0c29;
+            --bg-gradient-2: #302b63;
+            --bg-gradient-3: #24243e;
+            --text-color: #ffffff;
+            --primary-color: #4facfe;
+            --secondary-color: #00f2fe;
+            --accent-color: #ff006e;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --hover-scale: 1.05;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         /* General Styles */
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-color);
+            background: linear-gradient(135deg, var(--bg-gradient-1), var(--bg-gradient-2), var(--bg-gradient-3));
+            background-size: 300% 300%;
+            animation: gradientShift 15s ease infinite;
             color: var(--text-color);
-            margin: 0;
-            padding: 0;
             min-height: 100vh;
-            font-size: 16px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            overflow-x: hidden;
+            position: relative;
         }
 
-        .content-wrapper {
-            width: 90%;
-            max-width: 1200px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2rem;
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        /* Welcome Container Styles */
-        .welcome-container {
-            background-color: var(--input-bg);
-            padding: 1.5rem 1.6rem;
-            border-radius: 10px;
+        /* Floating Flags Background */
+        .flags-container {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 400px;
-            text-align: center;
-            margin-bottom: 5rem; /* Adjusted margin-bottom */
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
         }
 
-        .welcome-text {
-            font-size: clamp(2rem, 5vw, 3rem);
-            font-weight: 600;
-            margin: 0;
+        .flag-element {
+            position: absolute;
+            width: 48px;
+            height: 36px;
+            opacity: 0;
+            pointer-events: auto;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+            object-fit: contain;
         }
 
-        /* Mode Selection Buttons */
-        #mode-selection {
+        .flag-element:hover {
+            transform: scale(1.5) rotate(10deg);
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.6));
+        }
+
+        .flag-element.clicked {
+            animation: flagBurst 0.6s ease-out forwards;
+        }
+
+        @keyframes flagBurst {
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+            50% {
+                transform: scale(2) rotate(180deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Main Content Wrapper */
+        .content-wrapper {
+            position: relative;
+            z-index: 100;
+            min-height: 100vh;
             display: flex;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap; /* Allows wrapping on smaller screens */
+            padding: 2rem;
         }
 
-        /* Mode Selection Buttons */
-        .mode-button {
-            background-color: #2196F3; /* Blue color */
-            border: none;
-            color: white;
-            padding: 20px 40px;
+        /* Animated Title Container */
+        .title-container {
             text-align: center;
-            font-size: 24px;
+            margin-bottom: 4rem;
+            position: relative;
+        }
+
+        .main-title {
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: 800;
+            text-transform: lowercase;
+            letter-spacing: -0.02em;
+            position: relative;
+            display: inline-block;
+        }
+
+        .main-title span {
+            display: inline-block;
+            position: relative;
+            background: linear-gradient(45deg, #4facfe, #00f2fe, #ff006e, #4facfe);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientMove 3s ease infinite;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .title-flag {
+            position: absolute;
+            width: 48px;
+            height: 36px;
+            animation: orbit 10s linear infinite;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            object-fit: contain;
+        }
+
+        .title-flag:hover {
+            transform: scale(1.5);
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8));
+        }
+
+        .title-flag:nth-child(1) { animation-delay: 0s; }
+        .title-flag:nth-child(2) { animation-delay: 2.5s; }
+        .title-flag:nth-child(3) { animation-delay: 5s; }
+        .title-flag:nth-child(4) { animation-delay: 7.5s; }
+
+        @keyframes orbit {
+            0% {
+                transform: rotate(0deg) translateX(150px) rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg) translateX(150px) rotate(-360deg);
+            }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 1rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards 0.5s;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Interactive Mode Cards */
+        .modes-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 900px;
+            margin-bottom: 3rem;
+        }
+
+        .mode-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .mode-card:nth-child(1) { animation-delay: 0.6s; }
+        .mode-card:nth-child(2) { animation-delay: 0.8s; }
+        .mode-card:nth-child(3) { animation-delay: 1s; }
+
+        .mode-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .mode-card:hover::before {
+            opacity: 1;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .mode-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+            filter: drop-shadow(0 0 20px currentColor);
+        }
+
+        .mode-card[data-mode="solo"] .mode-icon { color: #4facfe; }
+        .mode-card[data-mode="learn"] .mode-icon { color: #00f2fe; }
+        .mode-card[data-mode="globe"] .mode-icon { color: #ff006e; }
+
+        .mode-title {
+            font-size: 1.8rem;
             font-weight: 600;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            flex: 1; /* Make buttons take equal available space */
-            max-width: 300px; /* Corrected from '300x' to '300px' */
-            box-sizing: border-box;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
         }
 
-        .mode-button:hover {
-            background-color: #0b7dda;
+        .mode-description {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.5;
         }
 
+        /* Floating Action Button */
+        .fab-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 200;
+        }
 
-        /* Leaderboard Button */
-        #leaderboard-button {
-            background-color: #2196F3; /* Blue */
+        .fab {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             border: none;
             color: white;
-            padding: 15px 30px;
-            text-align: center;
-            font-size: 20px;
-            border-radius: 8px;
+            font-size: 1.5rem;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-top: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        #leaderboard-button:hover {
-            background-color: #0b7dda;
+        .fab::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
         }
 
-        /* Leaderboard Modal */
+        .fab:hover::before {
+            width: 120%;
+            height: 120%;
+        }
+
+        .fab:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Leaderboard Modal - Enhanced */
         #leaderboard-modal {
             display: none;
             position: fixed;
@@ -119,106 +318,129 @@
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.7);
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
         }
 
         .modal-content {
-            background-color: var(--input-bg);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(20px);
             margin: 5% auto;
-            padding: 20px;
+            padding: 2rem;
             width: 90%;
-            max-width: 600px;
-            border-radius: 10px;
+            max-width: 700px;
+            border-radius: 20px;
             position: relative;
             color: var(--text-color);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         #close-leaderboard-modal {
-            color: #aaaaaa;
+            color: rgba(255, 255, 255, 0.7);
             float: right;
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        #close-leaderboard-modal:hover,
-        #close-leaderboard-modal:focus {
+        #close-leaderboard-modal:hover {
             color: #ffffff;
-            text-decoration: none;
-            cursor: pointer;
+            transform: rotate(90deg);
         }
 
         .modal-content h2 {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .modal-content select {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            background-color: var(--input-bg);
+            padding: 12px;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.1);
             color: var(--text-color);
-            border: 1px solid var(--input-border);
-            border-radius: 5px;
-            appearance: none;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-size: 1rem;
             cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-content select:hover,
+        .modal-content select:focus {
+            border-color: var(--primary-color);
+            outline: none;
         }
 
         .leaderboard-container {
             display: flex;
             justify-content: space-between;
-            gap: 20px;
+            gap: 2rem;
         }
 
         .leaderboard-column {
-            width: 48%;
-            background-color: #2a2a2a;
-            padding: 15px;
-            border-radius: 8px;
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .leaderboard-column h3 {
             text-align: center;
-            margin-bottom: 10px;
-            color: #e0e0e0;
+            margin-bottom: 1rem;
+            color: #ffffff;
+            font-size: 1.2rem;
         }
 
-        /* Leaderboard List Items */
         .leaderboard-column ol {
             list-style: none;
-            padding-left: 0;
+            padding: 0;
             margin: 0;
         }
 
         .leaderboard-column li {
-            padding: 10px 0;
-            border-bottom: 1px solid #444;
-            color: #ccc;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
             display: flex;
             align-items: center;
+            transition: all 0.3s ease;
         }
 
-        .leaderboard-column li:last-child {
-            border-bottom: none;
+        .leaderboard-column li:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
         }
 
         .rank-number {
             font-weight: bold;
-            color: #fff;
-            margin-right: 10px;
+            color: var(--primary-color);
+            margin-right: 12px;
             width: 30px;
-            text-align: right;
+            text-align: center;
         }
 
-        .leaderboard-column li span {
-            display: inline-block;
-        }
-
-
-
-        /* Top 5 Score Modal Styles */
+        /* Top 5 Score Modal */
         #top5-score-modal {
             display: none;
             position: fixed;
@@ -227,178 +449,541 @@
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.8);
+            background-color: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
         }
 
         #top5-score-modal .modal-content {
-            background-color: var(--input-bg);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(20px);
             margin: 10% auto;
-            padding: 20px;
+            padding: 3rem;
             width: 90%;
-            max-width: 400px;
-            border-radius: 10px;
-            position: relative;
-            color: var(--text-color);
+            max-width: 500px;
+            border-radius: 20px;
             text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.2);
         }
 
         #close-top5-modal {
-            color: #aaaaaa;
+            color: rgba(255, 255, 255, 0.7);
             position: absolute;
-            top: 10px;
-            right: 15px;
+            top: 15px;
+            right: 20px;
             font-size: 28px;
-            font-weight: bold;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        #close-top5-modal:hover,
-        #close-top5-modal:focus {
+        #close-top5-modal:hover {
             color: #ffffff;
-            text-decoration: none;
-            cursor: pointer;
+            transform: rotate(90deg);
         }
 
         #top5-score-modal h2 {
-            margin-top: 0;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        #top5-score-modal input[type="text"] {
+        #top5-modal-message {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        #player-name {
             width: 80%;
-            padding: 10px;
-            margin: 15px 0;
-            background-color: var(--input-bg);
-            color: var(--text-color);
-            border: 1px solid var(--input-border);
-            border-radius: 5px;
+            padding: 12px 20px;
+            margin: 1rem 0 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        #player-name:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.15);
         }
 
         #submit-score-button {
-            background-color: #2196F3;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             border: none;
             color: white;
-            padding: 10px 20px;
-            text-align: center;
-            font-size: 18px;
-            border-radius: 5px;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 10px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #submit-score-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        #submit-score-button:hover::before {
+            width: 120%;
+            height: 120%;
         }
 
         #submit-score-button:hover {
-            background-color: #0b7dda;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(79, 172, 254, 0.4);
         }
 
-
-        @media (max-width: 600px) {
-            .content-wrapper {
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .modes-container {
+                grid-template-columns: 1fr;
                 gap: 1.5rem;
             }
 
-            .welcome-container {
-                padding: 1rem 1.5rem;
+            .main-title {
+                font-size: clamp(2.5rem, 8vw, 4rem);
             }
 
-            button {
-                flex-basis: 100%;
+            .title-flag {
+                display: none;
             }
+
             .leaderboard-container {
                 flex-direction: column;
             }
 
-            .leaderboard-column {
-                width: 100%;
+            .fab {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
             }
-            #mode-selection {
-                flex-direction: column;
+        }
+
+        /* Particle effect for interactions */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            opacity: 1;
+            z-index: 9999;
+            will-change: transform;
+            object-fit: contain;
+        }
+
+        @keyframes particleFade {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(0);
+            }
+        }
+
+        /* Loading Animation Styles */
+        body:before,
+        body:after {
+            content: '';
+            position: fixed;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(135deg, var(--bg-gradient-1), var(--bg-gradient-2));
+            z-index: 9999;
+            transition: all 0.3s ease;
+        }
+
+        body:before {
+            top: -50%;
+        }
+
+        body:after {
+            bottom: -50%;
+        }
+
+        .loader {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10000;
+            opacity: 0;
+            text-align: center;
+            color: var(--text-color);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .loader-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .globe-spinner {
+            width: 100px;
+            height: 100px;
+            border: 4px solid rgba(79, 172, 254, 0.2);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: globeSpin 1.2s linear infinite;
+            position: relative;
+            box-shadow: 0 0 30px rgba(79, 172, 254, 0.3);
+        }
+
+        .globe-spinner::before {
+            content: '🌍';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            animation: globeRotate 3s linear infinite reverse;
+        }
+
+        @keyframes globeSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes globeRotate {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .loader-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .loader-subtext {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 400;
+        }
+
+        @media (max-width: 768px) {
+            .globe-spinner {
+                width: 80px;
+                height: 80px;
             }
 
-            .mode-button {
-                max-width: none;
-                width: 100%;
+            .globe-spinner::before {
+                font-size: 1.5rem;
+            }
+
+            .loader-text {
+                font-size: 1.2rem;
+            }
+
+            .loader-subtext {
+                font-size: 0.9rem;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div class="loader">
+        <div class="loader-content">
+            <div class="globe-spinner"></div>
+            <div class="loader-text">Loading Globe Mode</div>
+            <div class="loader-subtext">Preparing the world for you...</div>
+        </div>
+    </div>
+    <!-- Floating Flags Background -->
+    <div class="flags-container" id="flagsContainer"></div>
+
+    <!-- Main Content -->
     <div class="content-wrapper">
-        <div class="welcome-container">
-            <h1 class="welcome-text">flag.quest</h1>
+        <div class="title-container">
+            <h1 class="main-title">
+                <span>f</span><span>l</span><span>a</span><span>g</span><span>.</span><span>q</span><span>u</span><span>e</span><span>s</span><span>t</span>
+            </h1>
+            <!-- <img class="title-flag" src="https://flagcdn.com/48x36/us.png" style="top: -50px; left: 50%;" alt="US Flag">
+            <img class="title-flag" src="https://flagcdn.com/48x36/jp.png" style="top: 50%; right: -50px;" alt="Japan Flag">
+            <img class="title-flag" src="https://flagcdn.com/48x36/br.png" style="bottom: -50px; left: 50%;" alt="Brazil Flag">
+            <img class="title-flag" src="https://flagcdn.com/48x36/gb.png" style="top: 50%; left: -50px;" alt="UK Flag"> -->
+            <p class="subtitle">Master the world's flags, one quest at a time</p>
         </div>
 
-        <div id="mode-selection">
-            <button class="mode-button" onclick="selectMode('solo')">Solo</button>
-            <button class="mode-button" onclick="selectMode('learn')">Learn</button>
-            <button class="mode-button" onclick="selectMode('globe')">Globe</button>
-        </div>        
+        <div class="modes-container">
+            <div class="mode-card" data-mode="solo" onclick="selectMode('solo')">
+                <span class="mode-icon">🎯</span>
+                <h2 class="mode-title">Solo</h2>
+                <p class="mode-description">Test your knowledge with timed challenges and beat your personal best</p>
+            </div>
+            <div class="mode-card" data-mode="learn" onclick="selectMode('learn')">
+                <span class="mode-icon">📚</span>
+                <h2 class="mode-title">Learn</h2>
+                <p class="mode-description">Explore flags at your own pace with helpful hints and facts</p>
+            </div>
+            <div class="mode-card" data-mode="globe" onclick="selectMode('globe')">
+                <span class="mode-icon">🌍</span>
+                <h2 class="mode-title">Globe</h2>
+                <p class="mode-description">Navigate an interactive 3D world and discover flags by region</p>
+            </div>
+        </div>
+    </div>
 
-        <button id="leaderboard-button">Leaderboards</button>
+    <!-- Floating Action Button for Leaderboard -->
+    <div class="fab-container">
+        <button class="fab" id="leaderboard-button" title="View Leaderboards">
+            🏆
+        </button>
+    </div>
 
-        <!-- Leaderboard Modal -->
-        <div id="leaderboard-modal" class="modal">
-            <div class="modal-content">
-                <span id="close-leaderboard-modal">&times;</span>
-                <h2>Leaderboards</h2>
-                <select id="leaderboard-category-select">
-                    <!-- Options will be added dynamically -->
-                </select>
-                <div class="leaderboard-container">
-                    <div class="leaderboard-column">
-                        <h3>Local Top 5 Times</h3>
-                        <ol id="local-leaderboard-list"></ol>
-                    </div>
-                    <div class="leaderboard-column">
-                        <h3>Global Top 5 Times</h3>
-                        <ol id="global-leaderboard-list"></ol>
-                    </div>
+    <!-- Leaderboard Modal -->
+    <div id="leaderboard-modal">
+        <div class="modal-content">
+            <span id="close-leaderboard-modal">&times;</span>
+            <h2>🏆 Leaderboards</h2>
+            <select id="leaderboard-category-select">
+                <!-- Options will be added dynamically -->
+            </select>
+            <div class="leaderboard-container">
+                <div class="leaderboard-column">
+                    <h3>📍 Local Top 5</h3>
+                    <ol id="local-leaderboard-list"></ol>
+                </div>
+                <div class="leaderboard-column">
+                    <h3>🌍 Global Top 5</h3>
+                    <ol id="global-leaderboard-list"></ol>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Top 5 Score Modal -->
-        <div id="top5-score-modal" class="modal">
-            <div class="modal-content">
-                <span id="close-top5-modal">&times;</span>
-                <h2>Congratulations!</h2>
-                <p id="top5-modal-message">You achieved a top 5 global score!</p>
-                <label for="player-name">Please enter your name:</label>
-                <input type="text" id="player-name" placeholder="Your Name" />
-                <button id="submit-score-button">Submit Score</button>
-            </div>
-        </div>
 
+    <!-- Top 5 Score Modal -->
+    <div id="top5-score-modal">
+        <div class="modal-content">
+            <span id="close-top5-modal">&times;</span>
+            <h2>🎉 Congratulations! 🎉</h2>
+            <p id="top5-modal-message">You achieved a top 5 global score!</p>
+            <label for="player-name">Enter your name for the hall of fame:</label>
+            <input type="text" id="player-name" placeholder="Your Name" maxlength="20" />
+            <button id="submit-score-button">Submit Score</button>
+        </div>
+    </div>
 
     <script>
-        // Function to handle mode selection
-        function selectMode(mode) {
-            window.location.href = `/flag_guesser?mode=${mode}`;
+        // Flag images array for floating background - using image URLs instead of emojis for better compatibility
+        const flagImages = [
+            'https://flagcdn.com/48x36/us.png', 'https://flagcdn.com/48x36/gb.png', 'https://flagcdn.com/48x36/fr.png',
+            'https://flagcdn.com/48x36/de.png', 'https://flagcdn.com/48x36/it.png', 'https://flagcdn.com/48x36/es.png',
+            'https://flagcdn.com/48x36/ca.png', 'https://flagcdn.com/48x36/au.png', 'https://flagcdn.com/48x36/jp.png',
+            'https://flagcdn.com/48x36/kr.png', 'https://flagcdn.com/48x36/cn.png', 'https://flagcdn.com/48x36/in.png',
+            'https://flagcdn.com/48x36/br.png', 'https://flagcdn.com/48x36/mx.png', 'https://flagcdn.com/48x36/ar.png',
+            'https://flagcdn.com/48x36/za.png', 'https://flagcdn.com/48x36/eg.png', 'https://flagcdn.com/48x36/ng.png',
+            'https://flagcdn.com/48x36/ke.png', 'https://flagcdn.com/48x36/ru.png', 'https://flagcdn.com/48x36/ua.png',
+            'https://flagcdn.com/48x36/pl.png', 'https://flagcdn.com/48x36/se.png', 'https://flagcdn.com/48x36/no.png',
+            'https://flagcdn.com/48x36/fi.png', 'https://flagcdn.com/48x36/dk.png', 'https://flagcdn.com/48x36/nl.png',
+            'https://flagcdn.com/48x36/be.png', 'https://flagcdn.com/48x36/ch.png', 'https://flagcdn.com/48x36/at.png',
+            'https://flagcdn.com/48x36/gr.png', 'https://flagcdn.com/48x36/tr.png', 'https://flagcdn.com/48x36/il.png',
+            'https://flagcdn.com/48x36/sa.png', 'https://flagcdn.com/48x36/ae.png', 'https://flagcdn.com/48x36/qa.png',
+            'https://flagcdn.com/48x36/kw.png', 'https://flagcdn.com/48x36/om.png', 'https://flagcdn.com/48x36/jo.png',
+            'https://flagcdn.com/48x36/lb.png', 'https://flagcdn.com/48x36/ir.png', 'https://flagcdn.com/48x36/iq.png',
+            'https://flagcdn.com/48x36/pk.png', 'https://flagcdn.com/48x36/bd.png', 'https://flagcdn.com/48x36/lk.png',
+            'https://flagcdn.com/48x36/np.png', 'https://flagcdn.com/48x36/bt.png', 'https://flagcdn.com/48x36/mn.png',
+            'https://flagcdn.com/48x36/kz.png', 'https://flagcdn.com/48x36/uz.png', 'https://flagcdn.com/48x36/tm.png',
+            'https://flagcdn.com/48x36/kg.png', 'https://flagcdn.com/48x36/tj.png', 'https://flagcdn.com/48x36/az.png',
+            'https://flagcdn.com/48x36/ge.png', 'https://flagcdn.com/48x36/am.png', 'https://flagcdn.com/48x36/th.png',
+            'https://flagcdn.com/48x36/vn.png', 'https://flagcdn.com/48x36/la.png', 'https://flagcdn.com/48x36/kh.png',
+            'https://flagcdn.com/48x36/mm.png', 'https://flagcdn.com/48x36/sg.png', 'https://flagcdn.com/48x36/my.png',
+            'https://flagcdn.com/48x36/id.png', 'https://flagcdn.com/48x36/ph.png', 'https://flagcdn.com/48x36/tl.png',
+            'https://flagcdn.com/48x36/bn.png', 'https://flagcdn.com/48x36/pg.png', 'https://flagcdn.com/48x36/fj.png',
+            'https://flagcdn.com/48x36/nz.png', 'https://flagcdn.com/48x36/ws.png', 'https://flagcdn.com/48x36/to.png',
+            'https://flagcdn.com/48x36/vu.png', 'https://flagcdn.com/48x36/sb.png', 'https://flagcdn.com/48x36/ki.png',
+            'https://flagcdn.com/48x36/tv.png', 'https://flagcdn.com/48x36/nr.png', 'https://flagcdn.com/48x36/pw.png',
+            'https://flagcdn.com/48x36/mh.png', 'https://flagcdn.com/48x36/fm.png'
+        ];
+
+        // Create floating flags
+        function createFloatingFlag() {
+            const flagsContainer = document.getElementById('flagsContainer');
+            const flag = document.createElement('img');
+            flag.className = 'flag-element';
+            flag.src = flagImages[Math.floor(Math.random() * flagImages.length)];
+            flag.style.width = '48px';
+            flag.style.height = '36px';
+            
+            // Random starting position
+            const startX = Math.random() * window.innerWidth;
+            const startY = window.innerHeight + 100;
+            
+            flag.style.left = startX + 'px';
+            flag.style.top = startY + 'px';
+            
+            flagsContainer.appendChild(flag);
+            
+            // Animate the flag
+            const duration = 15000 + Math.random() * 10000; // 15-25 seconds
+            const endX = startX + (Math.random() - 0.5) * 200; // Slight horizontal drift
+            
+            gsap.to(flag, {
+                y: -window.innerHeight - 200,
+                x: endX - startX,
+                opacity: 0.3,
+                duration: duration / 1000,
+                ease: "none",
+                onComplete: () => flag.remove()
+            });
+            
+            // Add click interaction
+            flag.addEventListener('click', function(event) {
+                this.classList.add('clicked');
+                createParticles(event.pageX, event.pageY, this.src);
+                setTimeout(() => this.remove(), 600);
+            });
         }
 
-        // Function to handle resetting submittedScores on first launch
-        function initializeSubmittedScores() {
-            // Check if the user has launched the game before
-            const hasLaunched = localStorage.getItem('hasLaunched');
-
-            if (!hasLaunched) {
-                // It's the first launch, reset submittedScores
-                localStorage.setItem('submittedScores', JSON.stringify([]));
-                console.log('submittedScores has been initialized to an empty array.');
-
-                // Set the flag to indicate that the user has launched the game
-                localStorage.setItem('hasLaunched', 'true');
-            } else {
-                // Not the first launch, do not reset submittedScores
-                console.log('submittedScores exists and will not be reset.');
+        // Create particles on flag click
+        function createParticles(x, y, flagSrc) {
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('img');
+                particle.className = 'particle';
+                particle.src = flagSrc;
+                particle.style.width = '24px';
+                particle.style.height = '18px';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                
+                const angle = (Math.PI * 2 * i) / 8;
+                const velocity = 100 + Math.random() * 100;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity;
+                
+                particle.style.setProperty('--tx', tx + 'px');
+                particle.style.setProperty('--ty', ty + 'px');
+                particle.style.animation = 'particleFade 1s ease-out forwards';
+                
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 1000);
             }
         }
 
-        // Call the initialize function once when the page loads
+        // Start creating flags
+        setInterval(createFloatingFlag, 2000);
+        // Create initial flags
+        for (let i = 0; i < 5; i++) {
+            setTimeout(createFloatingFlag, i * 400);
+        }
+
+        // Animate title letters on hover
+        document.querySelectorAll('.main-title span').forEach((letter, index) => {
+            letter.addEventListener('mouseenter', function() {
+                gsap.to(this, {
+                    y: -10,
+                    scale: 1.2,
+                    duration: 0.3,
+                    ease: "back.out(1.7)"
+                });
+            });
+            
+            letter.addEventListener('mouseleave', function() {
+                gsap.to(this, {
+                    y: 0,
+                    scale: 1,
+                    duration: 0.3,
+                    ease: "back.out(1.7)"
+                });
+            });
+        });
+
+        // Function to handle mode selection
+        // Random loading messages
+        const loadingMessages = [
+            "Preparing the world for you...",
+            "I'm a little flag boy, are you?",
+            "Going flag mode crazy...",
+            "I HATE flags!",
+            "Eat. Sleep. Flag. Repeat.",
+            "Flag genius mode activating...",
+            "AUUGGHHH, too many flags!",
+            "Globing it up...",
+            "Entering big ball mode...",
+            "Flags are a design for a country...",
+            "I know about flags, do you?",
+            "Charging up flag cannons...",
+            "HELP ME PLEASE HELP ME I KNOW TOO MUCH ABOUT FLAGS",
+            "Can you find the flag secret?",
+            "Loading geographic data...",
+            "Preparing 3D visualization..."
+        ];
+
+        // Loading animation function
+        function triggerLoadingTransition() {
+            // Randomize the loading message
+            const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+            document.querySelector('.loader-subtext').textContent = randomMessage;
+            
+            const tl = gsap.timeline();
+            
+            tl.to(CSSRulePlugin.getRule('body:before'), 0.3, {cssRule: {top: '50%' }, ease: "power2.out"}, 'close')
+            .to(CSSRulePlugin.getRule('body:after'), 0.3, {cssRule: {bottom: '50%' }, ease: "power2.out"}, 'close')
+            .to('.loader', 0.2, {opacity: 1})
+            .to(CSSRulePlugin.getRule('body:before'), 0.3, {cssRule: {top: '0%' }, ease: "power2.out"}, '+=1.5', 'open')
+            .to(CSSRulePlugin.getRule('body:after'), 0.3, {cssRule: {bottom: '0%' }, ease: "power2.out"}, '-=0.3', 'open')
+            .to('.loader', 0.2, {opacity: 0}, '-=0.2')
+            .add(() => {
+                // Navigate to the globe mode after animation
+                window.location.href = `/flag_guesser?mode=globe`;
+            });
+        }
+
+        // Function to handle mode selection
+        function selectMode(mode) {
+            if (mode === 'globe') {
+                // Add loading state to button
+                const globeCard = document.querySelector('[data-mode="globe"]');
+                globeCard.style.pointerEvents = 'none';
+                globeCard.style.opacity = '0.7';
+                
+                // Trigger loading animation
+                triggerLoadingTransition();
+            } else {
+                // For other modes, navigate immediately
+                window.location.href = `/flag_guesser?mode=${mode}`;
+            }
+        }
+
+        // Initialize submitted scores
+        function initializeSubmittedScores() {
+            const hasLaunched = localStorage.getItem('hasLaunched');
+            if (!hasLaunched) {
+                localStorage.setItem('submittedScores', JSON.stringify([]));
+                localStorage.setItem('hasLaunched', 'true');
+            }
+        }
+
+        // Initialize on page load
         window.addEventListener('DOMContentLoaded', (event) => {
             initializeSubmittedScores();
             updateGlobalLeaderboard();
         });
 
+        // Leaderboard functionality
         const leaderboardButton = document.getElementById('leaderboard-button');
         const leaderboardModal = document.getElementById('leaderboard-modal');
         const closeLeaderboardModal = document.getElementById('close-leaderboard-modal');
@@ -406,7 +991,7 @@
         const localLeaderboardList = document.getElementById('local-leaderboard-list');
         const globalLeaderboardList = document.getElementById('global-leaderboard-list');
 
-        // Populate the category select options
+        // Category display names
         const continentDisplayNames = {
             "10_most_recognized": "Top 10 Most Recognized Flags",
             "30_most_recognized": "Top 30 Most Recognized Flags",
@@ -456,7 +1041,7 @@
             "us_states": "US States"
         };
 
-        // Populate the category select options
+        // Populate category select
         for (const [value, displayName] of Object.entries(continentDisplayNames)) {
             const option = document.createElement('option');
             option.value = value;
@@ -471,6 +1056,12 @@
 
         closeLeaderboardModal.addEventListener('click', () => {
             leaderboardModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === leaderboardModal) {
+                leaderboardModal.style.display = 'none';
+            }
         });
 
         leaderboardCategorySelect.addEventListener('change', () => {
@@ -489,17 +1080,11 @@
                     } else {
                         leaderboard.forEach((entry, index) => {
                             const li = document.createElement('li');
-
-                            // Add medal for top 3
                             let medal = '';
-                            if (index === 0) {
-                                medal = '🥇 '; // Gold Medal
-                            } else if (index === 1) {
-                                medal = '🥈 '; // Silver Medal
-                            } else if (index === 2) {
-                                medal = '🥉 '; // Bronze Medal
-                            }
-
+                            if (index === 0) medal = '🥇 ';
+                            else if (index === 1) medal = '🥈 ';
+                            else if (index === 2) medal = '🥉 ';
+                            
                             li.innerHTML = `<span class="rank-number">${index + 1}.</span> ${medal}${entry.name}: ${entry.time}`;
                             globalLeaderboardList.appendChild(li);
                         });
@@ -517,7 +1102,6 @@
             } else {
                 times.forEach((time, index) => {
                     const li = document.createElement('li');
-                    // Display rank number without medals
                     li.innerHTML = `<span class="rank-number">${index + 1}.</span> ${time}`;
                     localLeaderboardList.appendChild(li);
                 });
@@ -525,65 +1109,30 @@
         }
 
         function updateGlobalLeaderboard() {
-            // Get the list of categories from the leaderboard.json structure
             const categories = [
-                "10_most_recognized",
-                "30_most_recognized",
-                "50_most_recognized",
-                "all",
-                "africa",
-                "arab_league",
-                "asean_countries",
-                "asia",
-                "brics_countries",
-                "caribbean_nations",
-                "commonwealth_nations",
-                "countries_that_drive_on_the_left",
-                "countries_with_blue_primary_color",
-                "countries_with_coastlines_on_multiple_oceans",
-                "countries_with_crescent_moon_on_their_flags",
-                "countries_with_crosses_on_their_flags",
-                "countries_with_green_primary_color",
-                "countries_with_horizontal_stripes_on_their_flags",
-                "countries_with_only_one_bordering_country",
-                "countries_with_red_primary_color",
-                "countries_with_stars",
-                "countries_with_suns_on_their_flags",
-                "countries_with_union_jack_in_their_flags",
-                "countries_with_vertical_stripes_on_their_flags",
-                "countries_with_white_primary_color",
-                "countries_with_yellow_primary_color",
-                "europe",
-                "european_union",
-                "flags_with_animals",
-                "flags_with_stars",
-                "flags_with_unique_shapes",
-                "former_soviet_republics",
-                "g20_countries",
-                "island_nations",
-                "landlocked_countries",
-                "microstates",
-                "monarchies",
-                "newest_countries",
-                "nordic_countries",
-                "north_america",
-                "oceania",
-                "oldest_national_flags",
-                "olympic_host_nations",
-                "opec_members",
-                "pacific_island_nations",
-                "south_america",
-                "us_states"
+                "10_most_recognized", "30_most_recognized", "50_most_recognized", "all",
+                "africa", "arab_league", "asean_countries", "asia", "brics_countries",
+                "caribbean_nations", "commonwealth_nations", "countries_that_drive_on_the_left",
+                "countries_with_blue_primary_color", "countries_with_coastlines_on_multiple_oceans",
+                "countries_with_crescent_moon_on_their_flags", "countries_with_crosses_on_their_flags",
+                "countries_with_green_primary_color", "countries_with_horizontal_stripes_on_their_flags",
+                "countries_with_only_one_bordering_country", "countries_with_red_primary_color",
+                "countries_with_stars", "countries_with_suns_on_their_flags",
+                "countries_with_union_jack_in_their_flags", "countries_with_vertical_stripes_on_their_flags",
+                "countries_with_white_primary_color", "countries_with_yellow_primary_color",
+                "europe", "european_union", "flags_with_animals", "flags_with_stars",
+                "flags_with_unique_shapes", "former_soviet_republics", "g20_countries",
+                "island_nations", "landlocked_countries", "microstates", "monarchies",
+                "newest_countries", "nordic_countries", "north_america", "oceania",
+                "oldest_national_flags", "olympic_host_nations", "opec_members",
+                "pacific_island_nations", "south_america", "us_states"
             ];
 
-            let categoryIndex = 0; // To track the current category being processed
-
+            let categoryIndex = 0;
             let submittedScores = JSON.parse(localStorage.getItem('submittedScores') || '[]');
 
             function processNextCategory() {
-                if (categoryIndex >= categories.length) {
-                    return; // All categories processed
-                }
+                if (categoryIndex >= categories.length) return;
 
                 const category = categories[categoryIndex];
                 categoryIndex++;
@@ -595,14 +1144,13 @@
 
                     function processNextTime() {
                         if (timeIndex >= localTimes.length) {
-                            processNextCategory(); // Move to next category
+                            processNextCategory();
                             return;
                         }
 
                         const localTime = localTimes[timeIndex];
                         timeIndex++;
 
-                        // Check if the score has already been submitted to avoid duplicate prompts
                         if (submittedScores.includes(`${category}_${localTime}`)) {
                             processNextTime();
                             return;
@@ -616,33 +1164,21 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.is_top5) {
-                                // Show the custom modal
                                 const top5Modal = document.getElementById('top5-score-modal');
                                 const closeTop5Modal = document.getElementById('close-top5-modal');
                                 const submitScoreButton = document.getElementById('submit-score-button');
                                 const playerNameInput = document.getElementById('player-name');
                                 const modalMessage = document.getElementById('top5-modal-message');
 
-                                // Update modal message with the category name
                                 modalMessage.innerHTML = `You achieved a top 5 global score in <strong>${continentDisplayNames[category]}</strong>!`;
-
-                                // Clear any previous input
                                 playerNameInput.value = '';
-
                                 top5Modal.style.display = 'block';
 
-                                // Remove any previous event listeners
-                                closeTop5Modal.onclick = null;
-                                submitScoreButton.onclick = null;
-                                window.onclick = null;
-
-                                // Close modal when 'X' is clicked
                                 closeTop5Modal.onclick = function() {
                                     top5Modal.style.display = 'none';
                                     processNextTime();
                                 };
 
-                                // Close modal when clicking outside of it
                                 window.onclick = function(event) {
                                     if (event.target == top5Modal) {
                                         top5Modal.style.display = 'none';
@@ -650,7 +1186,6 @@
                                     }
                                 };
 
-                                // Handle score submission
                                 submitScoreButton.onclick = function() {
                                     const name = playerNameInput.value.trim();
                                     if (name) {
@@ -663,7 +1198,6 @@
                                         .then(data => {
                                             if (data.success) {
                                                 top5Modal.style.display = 'none';
-                                                // Add to submittedScores to avoid re-submission
                                                 submittedScores.push(`${category}_${localTime}`);
                                                 localStorage.setItem('submittedScores', JSON.stringify(submittedScores));
                                                 processNextTime();
@@ -680,7 +1214,6 @@
                                     }
                                 };
                             } else {
-                                // Score is not top 5; proceed to next time
                                 processNextTime();
                             }
                         })
@@ -692,16 +1225,12 @@
 
                     processNextTime();
                 } else {
-                    processNextCategory(); // No local times for this category; proceed to next category
+                    processNextCategory();
                 }
             }
 
             processNextCategory();
         }
-
-        // Function to handle resetting submittedScores on first launch is already defined above
-        // It is called on DOMContentLoaded
-
     </script>
 </body>
 </html>

@@ -14,33 +14,102 @@
 :root{--bg:#1a1a1a;--text:#f0f0f0;--accent:#3498db;--wrong:#e74c3c;--correct:#2ecc71}
 *{box-sizing:border-box;font-family:'Poppins',sans-serif}
 body{margin:0;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh}
+
 /* ───────────────────────────  Top Bar  ────────────────────────── */
-#flag-holder{height:88px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid #333;gap:1.1rem}
-#flag-holder img{max-height:76px;max-width:140px;object-fit:contain;display:none}
-#difficulty-controls{display:flex;align-items:center;gap:.75rem}
+#flag-holder{height:120px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid #333;gap:1.1rem}
+#flag-holder img{max-height:90px;max-width:160px;object-fit:contain;display:none}
+
+/* Mode Selection Screens */
+.selection-screen{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;justify-content:center;padding:0 1rem}
+.selection-screen.hidden{display:none}
+
+/* Mode Selection */
+#mode-selection{display:flex;align-items:center;gap:.75rem}
+.mode-btn{background:var(--accent);border:none;color:#fff;padding:.5rem 1.5rem;border-radius:8px;font-weight:600;cursor:pointer;transition:all .3s ease;font-size:.95rem}
+.mode-btn:hover{background:#0b7dda;transform:translateY(-1px);box-shadow:0 4px 12px rgba(52,152,219,0.3)}
+
+/* Difficulty Selection */  
+#difficulty-selection{display:flex;align-items:center;gap:.75rem}
 .diff-btn{background:none;border:1px solid #555;color:var(--text);padding:.45rem 1.1rem;border-radius:6px;font-weight:600;cursor:pointer;opacity:.6;transition:background .2s,opacity .2s}
 .diff-btn.selected{background:var(--accent);color:#fff;opacity:1}
-#start-btn{background:var(--accent);border:none;color:#fff;font-weight:600;font-size:1rem;padding:.5rem 1.8rem;border-radius:8px;cursor:pointer}
+
+/* Continent Selection */
+#continent-selection{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;max-width:480px;margin:0 1rem}
+.continent-btn{background:none;border:1px solid #555;color:var(--text);padding:.5rem .8rem;border-radius:6px;font-weight:600;cursor:pointer;opacity:.6;transition:all .2s ease;font-size:.9rem}
+.continent-btn.selected{background:var(--accent);color:#fff;opacity:1}
+.continent-btn:hover{opacity:.8;transform:translateY(-1px)}
+
+/* Control Buttons */
+.control-buttons{display:flex;flex-direction:column;align-items:center;gap:.5rem;margin-top:.75rem}
+#start-btn,#back-btn,#start-continent-btn{background:#27ae60;border:none;color:#fff;font-weight:600;font-size:.95rem;padding:.55rem 1.8rem;border-radius:8px;cursor:pointer;transition:all .3s ease;min-width:120px}
 #start-btn:disabled{opacity:.4;cursor:not-allowed}
+#start-btn:hover:not(:disabled),#start-continent-btn:hover{background:#229954;transform:translateY(-1px);box-shadow:0 4px 12px rgba(39,174,96,0.3)}
+#back-btn{background:#7f8c8d;opacity:.9}
+#back-btn:hover{background:#6c7b7d;opacity:1;transform:translateY(-1px);box-shadow:0 4px 12px rgba(127,140,141,0.3)}
+
 /* ───────────────────────────  Globe  ─────────────────────────── */
-#earth_div{flex:1 1 auto;position:relative;overflow:hidden;cursor:pointer}
+#earth_div{flex:1 1 auto;position:relative;overflow:hidden;cursor:pointer;min-height:0}
 #earth_div canvas{position:absolute;inset:0}
+
 /* ───────────────────────────  Bottom Bar  ────────────────────── */
-#guess-bar{height:70px;display:flex;align-items:center;justify-content:center;border-top:1px solid #333;z-index:10;background:var(--bg)}
+#guess-bar{height:90px;display:flex;align-items:center;justify-content:center;border-top:1px solid #333;background:var(--bg);flex-shrink:0}
 #guess-btn{background:var(--accent);border:none;color:#fff;font-weight:600;font-size:1.1rem;padding:.6rem 2.2rem;border-radius:8px;cursor:pointer;opacity:.4;transition:opacity .2s}
 #guess-btn:enabled{opacity:1}
+
 /* ───────────────────────────  Result Banner  ─────────────────── */
-#result-banner{position:absolute;top:95px;left:50%;transform:translateX(-50%);padding:.4rem .9rem;border-radius:6px;font-weight:600;display:none}
+#result-banner{position:absolute;top:130px;left:50%;transform:translateX(-50%);padding:.4rem .9rem;border-radius:6px;font-weight:600;display:none;z-index:1000}
+
+@media (max-width: 600px) {
+  #flag-holder{height:140px}
+  #continent-selection{grid-template-columns:repeat(2,1fr);margin:0 .5rem}
+  .selection-screen{flex-direction:column;align-items:center;padding:0 .5rem}
+  #mode-selection,#difficulty-selection{flex-direction:column;width:100%;max-width:280px}
+  .mode-btn,.diff-btn{text-align:center;width:100%}
+  .control-buttons{width:100%;max-width:200px}
+  .control-buttons button{width:100%}
+  #result-banner{top:150px}
+}
 </style>
 </head>
 <body>
   <div id="flag-holder">
-    <div id="difficulty-controls">
-      <button class="diff-btn selected" data-level="easy">Easy</button>
-      <button class="diff-btn" data-level="medium">Medium</button>
-      <button class="diff-btn" data-level="hard">Hard</button>
-      <button id="start-btn">Start</button>
+    <!-- Mode Selection Screen -->
+    <div id="mode-screen" class="selection-screen">
+      <div id="mode-selection">
+        <button class="mode-btn" data-mode="all">All Countries</button>
+        <button class="mode-btn" data-mode="continent">By Continent</button>
+      </div>
     </div>
+
+    <!-- Difficulty Selection Screen -->
+    <div id="difficulty-screen" class="selection-screen hidden">
+      <div id="difficulty-selection">
+        <button class="diff-btn selected" data-level="easy">Easy</button>
+        <button class="diff-btn" data-level="medium">Medium</button>
+        <button class="diff-btn" data-level="hard">Hard</button>
+      </div>
+      <div class="control-buttons">
+        <button id="back-btn-1" class="back-btn">Back</button>
+        <button id="start-btn">Start</button>
+      </div>
+    </div>
+
+    <!-- Continent Selection Screen -->
+    <div id="continent-screen" class="selection-screen hidden">
+      <div id="continent-selection">
+        <button class="continent-btn selected" data-continent="africa">Africa</button>
+        <button class="continent-btn" data-continent="asia">Asia</button>
+        <button class="continent-btn" data-continent="europe">Europe</button>
+        <button class="continent-btn" data-continent="north_america">North America</button>
+        <button class="continent-btn" data-continent="south_america">South America</button>
+        <button class="continent-btn" data-continent="oceania">Oceania</button>
+      </div>
+      <div class="control-buttons">
+        <button id="back-btn-2" class="back-btn">Back</button>
+        <button id="start-continent-btn">Start</button>
+      </div>
+    </div>
+
     <img id="flag-img" />
   </div>
   <div id="earth_div"></div>
@@ -48,17 +117,28 @@ body{margin:0;background:var(--bg);color:var(--text);display:flex;flex-direction
   <div id="result-banner"></div>
 
 <script>
-/* ========================= 0. ISO‑3 ➜ ISO‑2 map (trimmed) ========================= */
-const ISO3to2 = {/* trimmed for brevity, same as before */
+/* ========================= 0. ISO‑3 ➜ ISO‑2 map ========================= */
+const ISO3to2 = {
 AFG:'af',ALB:'al',DZA:'dz',ARG:'ar',ARM:'am',AUS:'au',AUT:'at',AZE:'az',BEL:'be',BGD:'bd',BGR:'bg',BRA:'br',CAN:'ca',CHL:'cl',CHN:'cn',COL:'co',CRI:'cr',CZE:'cz',DEU:'de',DNK:'dk',DOM:'do',ECU:'ec',EGY:'eg',ESP:'es',EST:'ee',FIN:'fi',FRA:'fr',GHA:'gh',GRC:'gr',HRV:'hr',HUN:'hu',IDN:'id',IND:'in',IRL:'ie',IRN:'ir',ISL:'is',ISR:'il',ITA:'it',JPN:'jp',KAZ:'kz',KEN:'ke',KOR:'kr',LBN:'lb',LKA:'lk',LTU:'lt',LUX:'lu',MAR:'ma',MEX:'mx',MYS:'my',NGA:'ng',NLD:'nl',NOR:'no',NZL:'nz',PAK:'pk',PER:'pe',PHL:'ph',POL:'pl',PRT:'pt',QAT:'qa',ROU:'ro',RUS:'ru',SAU:'sa',SDN:'sd',SEN:'sn',SGP:'sg',SVK:'sk',SVN:'si',SWE:'se',THA:'th',TUN:'tn',TUR:'tr',TZA:'tz',UGA:'ug',UKR:'ua',USA:'us',VEN:'ve',VNM:'vn',ZAF:'za',ZMB:'zm',ZWE:'zw',ETH:'et',COD:'cd',AGO:'ao',MOZ:'mz',MDG:'mg',CMR:'cm',CIV:'ci',NER:'ne',BFA:'bf',MLI:'ml',MWI:'mw',TCD:'td',SOM:'so',GIN:'gn',RWA:'rw',BEN:'bj',BDI:'bi',SSD:'ss',TGO:'tg',SLE:'sl',LBY:'ly',COG:'cg',LBR:'lr',CAF:'cf',MRT:'mr',ERI:'er',NAM:'na',GMB:'gm',BWA:'bw',GAB:'ga',LSO:'ls',GNB:'gw',GNQ:'gq',MUS:'mu',SWZ:'sz',DJI:'dj',COM:'km',CPV:'cv',STP:'st',SYC:'sc',YEM:'ye',NPL:'np',PRK:'kp',SYR:'sy',KHM:'kh',JOR:'jo',ARE:'ae',TJK:'tj',LAO:'la',KGZ:'kg',TKM:'tm',OMN:'om',PSE:'ps',KWT:'kw',GEO:'ge',MNG:'mn',BHR:'bh',TLS:'tl',CYP:'cy',BTN:'bt',MDV:'mv',BRN:'bn',GBR:'gb',BLR:'by',SRB:'rs',CHE:'ch',MKD:'mk',LVA:'lv',MNE:'me',MLT:'mt',AND:'ad',MCO:'mc',LIE:'li',SMR:'sm',VAT:'va',GTM:'gt',HTI:'ht',CUB:'cu',HND:'hn',SLV:'sv',NIC:'ni',PAN:'pa',JAM:'jm',TTO:'tt',BHS:'bs',BLZ:'bz',BRB:'bb',LCA:'lc',GRD:'gd',VCT:'vc',ATG:'ag',KNA:'kn',DMA:'dm',BOL:'bo',PRY:'py',URY:'uy',GUY:'gy',SUR:'sr',PNG:'pg',FJI:'fj',SLB:'sb',FSM:'fm',VUT:'vu',WSM:'ws',KIR:'ki',TON:'to',MHL:'mh',PLW:'pw',TUV:'tv',NRU:'nr',WLS:'gb-wls'};
 
 /* ========================= 1. Difficulty groups ========================= */
 const EASY_ISO3 = ['USA','GBR','CAN','AUS','FRA','DEU','JPN','CHN','RUS','BRA','ITA','MEX','IND','ESP','KOR','ARG','ZAF','SWE','NLD','NZL'];
-const MEDIUM_ISO3 = [...EASY_ISO3,'NOR','DNK','FIN','IRL','CHE','AUT','BEL','PRT','POL','GRC','TUR','SAU','ISR','EGY','ARE','THA','IDN','MYS','SGP','PAK','VNM','PHL','COL','PER','CHL','VEN','KEN','NGA','ETH','UGA','TZA','KAZ','UKR','ROU','CZE','HUN','SVK','SVN','HRV','EST','LVA','LTU','ARG','BOL','PRY','URY','SEN','GHA','MAR'];
+const MEDIUM_ISO3 = [...EASY_ISO3,'NOR','DNK','FIN','IRL','CHE','AUT','BEL','PRT','POL','GRC','TUR','SAU','ISR','EGY','ARE','THA','IDN','MYS','SGP','PAK','VNM','PHL','COL','PER','CHL','VEN','KEN','NGA','ETH','UGA','TZA','KAZ','UKR','ROU','CZE','HUN','SVK','SVN','HRV','EST','LVA','LTU','BOL','PRY','URY','SEN','GHA','MAR'];
+
+/* ========================= 2. Continent groups ========================= */
+const CONTINENTS = {
+  africa: ['DZA','AGO','BEN','BWA','BFA','BDI','CMR','CPV','CAF','TCD','COM','COG','COD','CIV','DJI','EGY','GNQ','ERI','ETH','GAB','GMB','GHA','GIN','GNB','KEN','LSO','LBR','LBY','MDG','MWI','MLI','MRT','MUS','MAR','MOZ','NAM','NER','NGA','RWA','STP','SEN','SYC','SLE','SOM','ZAF','SSD','SDN','SWZ','TZA','TGO','TUN','UGA','ZMB','ZWE'],
+  asia: ['AFG','ARM','AZE','BHR','BGD','BTN','BRN','KHM','CHN','CYP','GEO','IND','IDN','IRN','IRQ','ISR','JPN','JOR','KAZ','KWT','KGZ','LAO','LBN','MYS','MDV','MNG','MMR','NPL','PRK','KOR','OMN','PAK','PSE','PHL','QAT','RUS','SAU','SGP','LKA','SYR','TJK','THA','TLS','TUR','TKM','ARE','UZB','VNM','YEM'],
+  europe: ['ALB','AND','AUT','BLR','BEL','BIH','BGR','HRV','CZE','DNK','EST','FIN','FRA','DEU','GRC','HUN','ISL','IRL','ITA','XKX','LVA','LIE','LTU','LUX','MLT','MDA','MCO','MNE','NLD','MKD','NOR','POL','PRT','ROU','SMR','SRB','SVK','SVN','ESP','SWE','CHE','UKR','GBR','VAT'],
+  north_america: ['ATG','BHS','BRB','BLZ','CAN','CRI','CUB','DMA','DOM','SLV','GRD','GTM','HTI','HND','JAM','MEX','NIC','PAN','KNA','LCA','VCT','TTO','USA'],
+  south_america: ['ARG','BOL','BRA','CHL','COL','ECU','GUY','PRY','PER','SUR','URY','VEN'],
+  oceania: ['AUS','FJI','KIR','MHL','FSM','NRU','NZL','PLW','PNG','WSM','SLB','TON','TUV','VUT']
+};
+
 const EASY_ISO3to2   = Object.fromEntries(EASY_ISO3.map(c=>[c,ISO3to2[c]]));
 const MEDIUM_ISO3to2 = Object.fromEntries(MEDIUM_ISO3.map(c=>[c,ISO3to2[c]]));
 
-/* ========================= 2. DOM refs & constants ========================= */
+/* ========================= 3. DOM refs & constants ========================= */
 const flagImg  = document.getElementById('flag-img');
 const guessBtn = document.getElementById('guess-btn');
 const banner   = document.getElementById('result-banner');
@@ -66,19 +146,71 @@ const ACCENT   = getComputedStyle(document.documentElement).getPropertyValue('--
 const WRONG    = getComputedStyle(document.documentElement).getPropertyValue('--wrong');
 const CORRECT  = getComputedStyle(document.documentElement).getPropertyValue('--correct');
 
+// UI Navigation
+const modeScreen = document.getElementById('mode-screen');
+const difficultyScreen = document.getElementById('difficulty-screen');
+const continentScreen = document.getElementById('continent-screen');
+
+const startBtn = document.getElementById('start-btn');
+const startContinentBtn = document.getElementById('start-continent-btn');
+const backBtn1 = document.getElementById('back-btn-1');
+const backBtn2 = document.getElementById('back-btn-2');
+
+const modeButtons = [...document.querySelectorAll('.mode-btn')];
 const diffButtons = [...document.querySelectorAll('.diff-btn')];
-const startBtn    = document.getElementById('start-btn');
+const continentButtons = [...document.querySelectorAll('.continent-btn')];
+
+// Game state
+let gameMode = 'all'; // 'all' or 'continent'
 let difficulty = 'easy';
+let selectedContinent = 'africa';
+let gameStarted = false;
+
+/* ========================= 4. UI Navigation Logic ========================= */
+modeButtons.forEach(btn=>btn.addEventListener('click',()=>{
+  modeButtons.forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  gameMode = btn.dataset.mode;
+  
+  // Immediately navigate to appropriate screen
+  if(gameMode === 'all'){
+    modeScreen.classList.add('hidden');
+    difficultyScreen.classList.remove('hidden');
+  } else {
+    modeScreen.classList.add('hidden');
+    continentScreen.classList.remove('hidden');
+    // Center on default selected continent (Africa)
+    centerOnContinent(selectedContinent);
+  }
+}));
 
 diffButtons.forEach(btn=>btn.addEventListener('click',()=>{
   diffButtons.forEach(b=>b.classList.toggle('selected',b===btn));
   difficulty = btn.dataset.level;
 }));
 
-/* ========================= 3. Build the Globe ========================= */
+continentButtons.forEach(btn=>btn.addEventListener('click',()=>{
+  continentButtons.forEach(b=>b.classList.toggle('selected',b===btn));
+  selectedContinent = btn.dataset.continent;
+  
+  // Center globe on selected continent
+  centerOnContinent(selectedContinent);
+}));
+
+backBtn1.addEventListener('click',()=>{
+  difficultyScreen.classList.add('hidden');
+  modeScreen.classList.remove('hidden');
+});
+
+backBtn2.addEventListener('click',()=>{
+  continentScreen.classList.add('hidden');
+  modeScreen.classList.remove('hidden');
+  // Return to world view when going back to mode selection
+  globe.pointOfView({ lat: 0, lng: 0, altitude: 2 }, 1000);
+});
+
+/* ========================= 5. Build the Globe ========================= */
 const WORLD_BLUE = 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg';
-//const WORLD_BLUE = 'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-blue-marble.jpg';
-const WORLD_TOPOLOGY = 'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-topology.png';
 const globe = Globe()(document.getElementById('earth_div'))
   .globeImageUrl(WORLD_BLUE)
   .backgroundImageUrl('//cdn.jsdelivr.net/npm/three-globe/example/img/night-sky.png')
@@ -88,13 +220,26 @@ const globe = Globe()(document.getElementById('earth_div'))
   .polygonAltitude(0.002)
   .polygonCapColor(()=> 'rgba(0,0,0,0)')
   .polygonSideColor(()=> 'rgba(0,0,0,0)')
-  .polygonStrokeColor(()=> 'rgba(255,255,255,0.18)')
+  .polygonStrokeColor(()=> 'rgba(255,255,255,0.4)') // More visible borders
   .polygonsTransitionDuration(0);
 
 globe.controls().autoRotate = false;
 globe.controls().enableZoom = true;
 
-/* ========================= 4. GeoJSON + helpers ========================= */
+// Ensure globe resizes with window changes
+function handleResize() {
+  const container = document.getElementById('earth_div');
+  if (container) {
+    const rect = container.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      globe.width(rect.width).height(rect.height);
+    }
+  }
+}
+
+window.addEventListener('resize', handleResize);
+
+/* ========================= 6. GeoJSON + helpers ========================= */
 let polyData = [];
 let queue = [];
 let current = null;
@@ -107,42 +252,67 @@ function hasFlag(f){
   const iso3 = (f.id || f.properties.iso_a3 || '').toUpperCase().replace(/-.*/, '');
   return ISO3to2.hasOwnProperty(iso3);
 }
+
 function hasEasyFlag(f){
   const iso3 = (f.id || f.properties.iso_a3 || '').toUpperCase().replace(/-.*/, '');
   return EASY_ISO3to2.hasOwnProperty(iso3);
 }
+
 function hasMediumFlag(f){
   const iso3 = (f.id || f.properties.iso_a3 || '').toUpperCase().replace(/-.*/, '');
   return MEDIUM_ISO3to2.hasOwnProperty(iso3);
 }
+
+function hasContinent(f, continent){
+  const iso3 = (f.id || f.properties.iso_a3 || '').toUpperCase().replace(/-.*/, '');
+  return CONTINENTS[continent] && CONTINENTS[continent].includes(iso3) && ISO3to2.hasOwnProperty(iso3);
+}
+
 function buildQueue(){
   let filter = hasFlag;
-  if(difficulty==='easy') filter = hasEasyFlag;
-  if(difficulty==='medium') filter = hasMediumFlag;
-  queue = polyData.filter(filter).sort(()=>Math.random()-0.5);
+  
+  if(gameMode === 'all'){
+    if(difficulty==='easy') filter = hasEasyFlag;
+    if(difficulty==='medium') filter = hasMediumFlag;
+    queue = polyData.filter(filter).sort(()=>Math.random()-0.5);
+  } else {
+    // Continent mode
+    queue = polyData.filter(f=>hasContinent(f, selectedContinent)).sort(()=>Math.random()-0.5);
+  }
 }
 
 fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
   .then(r=>r.json())
   .then(gj=>{
     polyData = gj.features.filter(f=>f.properties.name!=='Antarctica').filter(hasFlag);
-    globe.polygonsData(polyData); // show all countries always
+    globe.polygonsData(polyData);
+    
+    // Ensure proper sizing after data loads
+    setTimeout(() => {
+      const container = document.getElementById('earth_div');
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          globe.width(rect.width).height(rect.height);
+        }
+      }
+    }, 500);
   });
 
-/* ========================= 5. Styling helpers ========================= */
+/* ========================= 7. Styling helpers ========================= */
 function refreshStyles(){
   globe
     .polygonCapColor(f=>{
-      if(correctPoly && f===correctPoly) return 'rgba(46,204,113,0.55)'; // green
-      if(wrongGuesses.includes(f))       return 'rgba(231,76,60,0.55)';  // red
-      if(f===selected)                   return ACCENT;                  // blue accent for hover/selection
+      if(correctPoly && f===correctPoly) return 'rgba(46,204,113,0.55)';
+      if(wrongGuesses.includes(f))       return 'rgba(231,76,60,0.55)';
+      if(f===selected)                   return ACCENT;
       return 'rgba(0,0,0,0)';
     })
     .polygonStrokeColor(f=>{
       if(correctPoly && f===correctPoly) return CORRECT;
       if(wrongGuesses.includes(f))       return WRONG;
       if(f===selected)                   return ACCENT;
-      return 'rgba(255,255,255,0.18)';
+      return 'rgba(255,255,255,0.4)'; // More visible default borders
     })
     .polygonAltitude(f=>{
       if(correctPoly && f===correctPoly) return 0.02;
@@ -158,21 +328,142 @@ function showBanner(txt,bg){
   banner.style.display = 'block';
   setTimeout(()=>banner.style.display='none',1200);
 }  
-function flagPath(iso3){if(!iso3)return '/static/flags/unknown.png';const plain=iso3.replace(/-.*/, '').toUpperCase();const iso2=ISO3to2[plain]||ISO3to2[plain.slice(0,2)];return iso2?`/static/flags/${iso2.toLowerCase()}.png`:'/static/flags/unknown.png';}
 
-/* ──────────────────────────────────────────────────────────────── */
-/* 6.  Game flow                                                   */
-/* ──────────────────────────────────────────────────────────────── */
-function nextFlag(){selected=null;strikes=0;wrongGuesses=[];guessBtn.disabled=true;if(!queue.length){alert('🎉 All done!');location.reload();return;}current=queue.pop();flagImg.src=flagPath(current.id||current.properties.iso_a3);refreshStyles();}
+function flagPath(iso3){
+  if(!iso3)return '/static/flags/unknown.png';
+  const plain=iso3.replace(/-.*/, '').toUpperCase();
+  const iso2=ISO3to2[plain]||ISO3to2[plain.slice(0,2)];
+  return iso2?`/static/flags/${iso2.toLowerCase()}.png`:'/static/flags/unknown.png';
+}
 
-/* ──────────────────────────────────────────────────────────────── */
-/* 7.  Interaction handlers                                        */
-/* ──────────────────────────────────────────────────────────────── */
-startBtn.addEventListener('click',()=>{document.getElementById('difficulty-controls').style.display='none';flagImg.style.display='block';buildQueue();nextFlag();});
+/* ========================= 8. Utility functions for globe rotation ========================= */
+function getPolygonCenter(polygon) {
+  let totalLat = 0, totalLng = 0, pointCount = 0;
+  const coordinates = polygon.geometry.coordinates;
+  
+  const processCoords = (coordArray) => {
+    coordArray.forEach(ring => {
+      ring.forEach(point => {
+        totalLng += point[0];
+        totalLat += point[1];
+        pointCount++;
+      });
+    });
+  };
+  
+  if (polygon.geometry.type === 'Polygon') {
+    processCoords(coordinates);
+  } else if (polygon.geometry.type === 'MultiPolygon') {
+    coordinates.forEach(processCoords);
+  }
+  
+  return {
+    lat: totalLat / pointCount,
+    lng: totalLng / pointCount
+  };
+}
 
-globe.onPolygonClick((poly)=>{if(!poly)return;selected=poly;refreshStyles();guessBtn.disabled=false;});
+function centerOnCountry(polygon) {
+  const center = getPolygonCenter(polygon);
+  globe.pointOfView(center, 1500);
+}
 
-guessBtn.addEventListener('click',()=>{if(!selected)return;const correct=(selected===current);if(correct){showBanner('Correct!','#2ecc71');queue.length&&setTimeout(nextFlag,900);}else{strikes++;wrongGuesses.push(selected);showBanner(`Wrong (${strikes}/3)`,WRONG);if(strikes>=3){refreshStyles();setTimeout(nextFlag,1200);}else{guessBtn.disabled=true;selected=null;refreshStyles();}}});
+// Continent center coordinates
+const CONTINENT_CENTERS = {
+  africa: { lat: 0, lng: 20 },
+  asia: { lat: 35, lng: 100 },
+  europe: { lat: 55, lng: 25 },
+  north_america: { lat: 45, lng: -100 },
+  south_america: { lat: -15, lng: -60 },
+  oceania: { lat: -25, lng: 140 }
+};
+
+function centerOnContinent(continent) {
+  const center = CONTINENT_CENTERS[continent];
+  if (center) {
+    globe.pointOfView(center, 1500); // 1.5 second smooth transition
+  }
+}
+
+/* ========================= 9. Game flow ========================= */
+function startGame(){
+  // Hide all selection screens
+  modeScreen.classList.add('hidden');
+  difficultyScreen.classList.add('hidden'); 
+  continentScreen.classList.add('hidden');
+  
+  // Show flag and enable country selection
+  flagImg.style.display='block';
+  gameStarted = true;
+  
+  buildQueue();
+  nextFlag();
+}
+
+function nextFlag(){
+  selected=null;
+  correctPoly=null;
+  strikes=0;
+  wrongGuesses=[];
+  guessBtn.disabled=true;
+  
+  if(!queue.length){
+    alert('🎉 All done!');
+    location.reload();
+    return;
+  }
+  
+  current=queue.pop();
+  flagImg.src=flagPath(current.id||current.properties.iso_a3);
+  refreshStyles();
+}
+
+/* ========================= 10. Event handlers ========================= */
+startBtn.addEventListener('click', startGame);
+startContinentBtn.addEventListener('click', startGame);
+
+globe.onPolygonClick((poly)=>{
+  if(!poly) return;
+  
+  // Allow globe interaction but only enable country selection after game starts
+  if(gameStarted){
+    selected=poly;
+    refreshStyles();
+    guessBtn.disabled=false;
+  }
+});
+
+guessBtn.addEventListener('click',()=>{
+  if(!selected)return;
+  const correct=(selected===current);
+  
+  if(correct){
+    correctPoly = selected;
+    selected = null;
+    refreshStyles();
+    showBanner('Correct!','#2ecc71');
+    
+    if(queue.length) {
+      setTimeout(nextFlag, 900);
+    }
+  } else {
+    strikes++;
+    wrongGuesses.push(selected);
+    showBanner(`Wrong (${strikes}/3)`,WRONG);
+    
+    if(strikes>=3){
+      correctPoly = current;
+      selected = null;
+      refreshStyles();
+      centerOnCountry(current);
+      setTimeout(nextFlag, 3000);
+    } else {
+      guessBtn.disabled=true;
+      selected=null;
+      refreshStyles();
+    }
+  }
+});
 </script>
 </body>
 </html>
